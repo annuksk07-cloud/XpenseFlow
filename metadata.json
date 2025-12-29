@@ -1,0 +1,5 @@
+{
+  "name": "Receipt & Expense Tracker",
+  "description": "A neumorphic-style mobile expense tracker to manage your daily transactions with persistent storage.",
+  "requestFramePermissions": []
+}
