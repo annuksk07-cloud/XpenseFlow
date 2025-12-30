@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, HarmCategory, HarmBlockThreshold } from "@google/genai";
 import { Transaction } from '../types';
 
 interface AIInsightsProps {
@@ -12,25 +12,37 @@ const AIInsights: React.FC<AIInsightsProps> = ({ transactions }) => {
   const [error, setError] = useState<string | null>(null);
 
   const getAISummary = async () => {
-    // FIX: Per coding guidelines, the API key is assumed to be available and should not be checked for explicitly.
+    if (transactions.length === 0) {
+      setError("Please add some transactions to get an AI summary.");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     setSummary('');
 
     try {
-      // FIX: The API key must be obtained exclusively from `process.env.API_KEY`.
+      // FIX: The API key must be obtained from process.env.API_KEY.
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const prompt = `You are a financial assistant. Based on this JSON data of my recent transactions, provide a short, bulleted summary (3-4 points) of my spending habits and one actionable insight. Address me directly. Data: ${JSON.stringify(transactions.slice(0, 20))}`;
       
+      const safetySettings = [
+        { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+      ];
+
+      // FIX: The 'safetySettings' parameter was incorrectly placed inside the 'config' object. It is a top-level parameter for the generateContent method.
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: prompt,
+        safetySettings,
       });
 
       setSummary(response.text);
     } catch (err) {
       console.error("Gemini API Error:", err);
-      // FIX: Use a generic error message that does not mention API keys.
       setError("Could not get AI summary. Please try again later.");
     } finally {
       setIsLoading(false);
