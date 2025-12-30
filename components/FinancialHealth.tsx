@@ -23,7 +23,7 @@ const FinancialHealth: React.FC<FinancialHealthProps> = ({ savingsRate, budgetUs
            </div>
            <span className="text-xs font-bold text-gray-500 uppercase">Savings Streak</span>
            <span className="text-xl font-black text-gray-700">{savingsRate > 0 ? 'Active' : 'Inactive'}</span>
-           <span className="text-[10px] text-gray-400 mt-1">Keep saving > 20%</span>
+           <span className="text-[10px] text-gray-400 mt-1">Keep saving {'>'} 20%</span>
         </div>
 
         {/* Debt/Savings Gauge */}
