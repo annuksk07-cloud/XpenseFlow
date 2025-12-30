@@ -1,13 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Transaction, Settings, Stats, ToastMessage, TransactionType, CURRENCIES, CurrencyCode } from '../types';
+import { Transaction, Settings, Stats, ToastMessage, TransactionType, CURRENCIES, CurrencyCode, Subscription } from '../types';
 
 const STORAGE_KEY_TRANSACTIONS = 'expense_tracker_transactions';
 const STORAGE_KEY_SETTINGS = 'expense_tracker_settings';
+const STORAGE_KEY_SUBSCRIPTIONS = 'expense_tracker_subscriptions';
 
 const generateUUID = () => crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => (Math.random() * 16 | 0).toString(16));
 
 export const useTransactions = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [settings, setSettings] = useState<Settings>({
     budgetLimit: 2000,
     savingsGoal: 5000,
@@ -22,12 +24,10 @@ export const useTransactions = () => {
     try {
       const savedTransactions = localStorage.getItem(STORAGE_KEY_TRANSACTIONS);
       const savedSettings = localStorage.getItem(STORAGE_KEY_SETTINGS);
-      if (savedTransactions) {
-        setTransactions(JSON.parse(savedTransactions));
-      }
-      if (savedSettings) {
-        setSettings(JSON.parse(savedSettings));
-      }
+      const savedSubscriptions = localStorage.getItem(STORAGE_KEY_SUBSCRIPTIONS);
+      if (savedTransactions) setTransactions(JSON.parse(savedTransactions));
+      if (savedSettings) setSettings(JSON.parse(savedSettings));
+      if (savedSubscriptions) setSubscriptions(JSON.parse(savedSubscriptions));
     } catch (error) {
       console.error('Failed to load data from localStorage', error);
     } finally {
@@ -36,17 +36,10 @@ export const useTransactions = () => {
   }, []);
 
   // Save state to localStorage whenever it changes
-  useEffect(() => {
-    if (isDataLoaded) {
-      localStorage.setItem(STORAGE_KEY_TRANSACTIONS, JSON.stringify(transactions));
-    }
-  }, [transactions, isDataLoaded]);
+  useEffect(() => { if (isDataLoaded) localStorage.setItem(STORAGE_KEY_TRANSACTIONS, JSON.stringify(transactions)); }, [transactions, isDataLoaded]);
+  useEffect(() => { if (isDataLoaded) localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(settings)); }, [settings, isDataLoaded]);
+  useEffect(() => { if (isDataLoaded) localStorage.setItem(STORAGE_KEY_SUBSCRIPTIONS, JSON.stringify(subscriptions)); }, [subscriptions, isDataLoaded]);
 
-  useEffect(() => {
-    if (isDataLoaded) {
-      localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(settings));
-    }
-  }, [settings, isDataLoaded]);
 
   const addToast = (message: string, type: ToastMessage['type'] = 'info') => {
     const id = generateUUID();
@@ -81,6 +74,17 @@ export const useTransactions = () => {
     addToast('Transaction removed.', 'info');
   };
   
+  const addSubscription = (data: Omit<Subscription, 'id'>) => {
+    const newSubscription: Subscription = { ...data, id: generateUUID() };
+    setSubscriptions(prev => [...prev, newSubscription].sort((a,b) => new Date(a.nextDueDate).getTime() - new Date(b.nextDueDate).getTime()));
+    addToast('Subscription added!', 'success');
+  };
+  
+  const deleteSubscription = (id: string) => {
+    setSubscriptions(prev => prev.filter(s => s.id !== id));
+    addToast('Subscription removed.', 'info');
+  };
+
   const updateSettings = (newSettings: Partial<Settings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
     addToast('Settings updated!', 'success');
@@ -102,5 +106,5 @@ export const useTransactions = () => {
   const exportToCSV = () => { /* ... (Logic remains the same) ... */ addToast('Data exported'); };
   const backupData = () => { /* ... (Logic remains the same) ... */ addToast('Backup created'); };
 
-  return { transactions, addTransaction, deleteTransaction, stats, settings, updateSettings, toasts, removeToast, exportToCSV, backupData, isDataLoaded };
+  return { transactions, addTransaction, deleteTransaction, subscriptions, addSubscription, deleteSubscription, stats, settings, updateSettings, toasts, removeToast, exportToCSV, backupData, isDataLoaded };
 };

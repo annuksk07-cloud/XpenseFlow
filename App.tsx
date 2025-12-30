@@ -7,12 +7,15 @@ import SettingsModal from './components/SettingsModal';
 import Analytics from './components/Analytics';
 import FinancialHealth from './components/FinancialHealth';
 import AIInsights from './components/AIInsights';
+import SubscriptionManager from './components/SubscriptionManager';
+import AddSubscriptionModal from './components/AddSubscriptionModal';
 import Toast from './components/Toast';
 
 const App: React.FC = () => {
-  const { transactions, addTransaction, deleteTransaction, stats, settings, updateSettings, toasts, removeToast, exportToCSV, backupData, isDataLoaded } = useTransactions();
+  const { transactions, addTransaction, deleteTransaction, subscriptions, addSubscription, deleteSubscription, stats, settings, updateSettings, toasts, removeToast, exportToCSV, backupData, isDataLoaded } = useTransactions();
   const [isAddModalOpen, setAddModalOpen] = useState(false);
   const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
+  const [isAddSubModalOpen, setAddSubModalOpen] = useState(false);
 
   if (!isDataLoaded) {
     return (
@@ -32,8 +35,9 @@ const App: React.FC = () => {
 
         <main className="flex-1 px-6 overflow-y-auto pb-24">
           <Dashboard stats={stats} settings={settings} onSettingsClick={() => setSettingsModalOpen(true)} />
-          <FinancialHealth stats={stats} settings={settings} />
+          <FinancialHealth stats={stats} settings={settings} updateSettings={updateSettings} />
           <AIInsights transactions={transactions} />
+          <SubscriptionManager subscriptions={subscriptions} settings={settings} onDelete={deleteSubscription} onAddClick={() => setAddSubModalOpen(true)} />
           <Analytics transactions={transactions} />
           <TransactionList transactions={transactions} onDelete={deleteTransaction} settings={settings} />
         </main>
@@ -55,6 +59,12 @@ const App: React.FC = () => {
         onAdd={addTransaction}
       />
       
+      <AddSubscriptionModal
+        isOpen={isAddSubModalOpen}
+        onClose={() => setAddSubModalOpen(false)}
+        onAdd={addSubscription}
+      />
+
       <SettingsModal
         isOpen={isSettingsModalOpen}
         onClose={() => setSettingsModalOpen(false)}

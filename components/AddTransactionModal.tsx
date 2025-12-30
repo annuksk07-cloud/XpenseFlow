@@ -52,12 +52,12 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
             <button type="button" onClick={() => setType(TransactionType.INCOME)} className={`flex-1 py-4 rounded-lg font-bold text-sm transition-all duration-300 ${type === TransactionType.INCOME ? 'bg-[#efeeee] text-green-600 shadow-[5px_5px_10px_#bebebe,-5px_-5px_10px_#ffffff]' : 'text-gray-400'}`}>Income</button>
           </div>
           <div className="space-y-4">
-            <input type="text" placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} required className="w-full px-4 py-3 bg-[#efeeee] rounded-xl outline-none shadow-[inset_5px_5px_10px_#d1d1d1,inset_-5px_-5px_10px_#ffffff]" />
+            <input type="text" placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} required className="w-full px-4 py-3 bg-[#efeeee] rounded-xl outline-none shadow-[inset_5px_5px_10px_#d1d1d1,inset_-5px_-5px_10px_#ffffff] placeholder:text-gray-500 text-gray-800" />
             <div className="flex gap-3">
-               <input type="number" placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} required className="flex-1 w-full px-4 py-3 bg-[#efeeee] rounded-xl outline-none shadow-[inset_5px_5px_10px_#d1d1d1,inset_-5px_-5px_10px_#ffffff]" />
-               <select value={currency} onChange={e => setCurrency(e.target.value as CurrencyCode)} className="w-1/3 px-4 py-3 bg-[#efeeee] rounded-xl outline-none shadow-[inset_5px_5px_10px_#d1d1d1,inset_-5px_-5px_10px_#ffffff]">{Object.keys(CURRENCIES).map(c => <option key={c} value={c}>{c}</option>)}</select>
+               <input type="number" placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} required className="flex-1 w-full px-4 py-3 bg-[#efeeee] rounded-xl outline-none shadow-[inset_5px_5px_10px_#d1d1d1,inset_-5px_-5px_10px_#ffffff] placeholder:text-gray-500 text-gray-800" />
+               <select value={currency} onChange={e => setCurrency(e.target.value as CurrencyCode)} className="w-1/3 px-4 py-3 bg-[#efeeee] rounded-xl outline-none shadow-[inset_5px_5px_10px_#d1d1d1,inset_-5px_-5px_10px_#ffffff] text-gray-800">{Object.keys(CURRENCIES).map(c => <option key={c} value={c}>{c}</option>)}</select>
             </div>
-            <select value={category} onChange={e => setCategory(e.target.value)} className="w-full px-4 py-3 bg-[#efeeee] rounded-xl outline-none shadow-[inset_5px_5px_10px_#d1d1d1,inset_-5px_-5px_10px_#ffffff]">{CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}</select>
+            <select value={category} onChange={e => setCategory(e.target.value)} className="w-full px-4 py-3 bg-[#efeeee] rounded-xl outline-none shadow-[inset_5px_5px_10px_#d1d1d1,inset_-5px_-5px_10px_#ffffff] text-gray-800">{CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}</select>
           </div>
           <button type="submit" className="w-full py-4 rounded-xl bg-[#efeeee] text-blue-500 font-bold shadow-[6px_6px_12px_#c5c5c5,-6px_-6px_12px_#ffffff] flex items-center justify-center gap-2"><i className="fa-solid fa-check"></i>Save Transaction</button>
         </form>

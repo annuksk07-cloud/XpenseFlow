@@ -31,6 +31,15 @@ export interface Transaction {
   date: string; // ISO string
 }
 
+export interface Subscription {
+  id: string;
+  name: string;
+  amount: number;
+  currency: CurrencyCode;
+  billingCycle: 'monthly' | 'yearly';
+  nextDueDate: string; // ISO string
+}
+
 export interface Settings {
   budgetLimit: number;
   savingsGoal: number;
