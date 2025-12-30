@@ -12,15 +12,13 @@ const AIInsights: React.FC<AIInsightsProps> = ({ transactions }) => {
   const [error, setError] = useState<string | null>(null);
 
   const getAISummary = async () => {
-    if (!process.env.API_KEY) {
-      setError("API key not configured.");
-      return;
-    }
+    // FIX: Per coding guidelines, the API key is assumed to be available and should not be checked for explicitly.
     setIsLoading(true);
     setError(null);
     setSummary('');
 
     try {
+      // FIX: The API key must be obtained exclusively from `process.env.API_KEY`.
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const prompt = `You are a financial assistant. Based on this JSON data of my recent transactions, provide a short, bulleted summary (3-4 points) of my spending habits and one actionable insight. Address me directly. Data: ${JSON.stringify(transactions.slice(0, 20))}`;
       
@@ -32,7 +30,8 @@ const AIInsights: React.FC<AIInsightsProps> = ({ transactions }) => {
       setSummary(response.text);
     } catch (err) {
       console.error("Gemini API Error:", err);
-      setError("Could not get AI summary. Please check your API key.");
+      // FIX: Use a generic error message that does not mention API keys.
+      setError("Could not get AI summary. Please try again later.");
     } finally {
       setIsLoading(false);
     }

@@ -16,8 +16,13 @@ const App: React.FC = () => {
   const [isAddModalOpen, setAddModalOpen] = useState(false);
   const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
   const [isAddSubModalOpen, setAddSubModalOpen] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
 
-  if (!isDataLoaded) {
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  if (!hasMounted || !isDataLoaded) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#efeeee]">
         <div className="w-12 h-12 rounded-full border-4 border-t-blue-500 border-gray-200 animate-spin"></div>
