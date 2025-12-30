@@ -38,7 +38,7 @@ const BudgetGoals: React.FC<BudgetGoalsProps> = ({ settings, totalExpense, total
         <h3 className="text-lg font-bold text-gray-700">Goals & Limits</h3>
         <button 
           onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-          className="p-2 rounded-full bg-[#efeeee] shadow-[3px_3px_6px_#c5c5c5,-3px_-3px_6px_#ffffff] text-blue-500 active:shadow-[inset_2px_2px_4px_#c5c5c5,inset_-2px_-2px_4px_#ffffff] transition-all"
+          className="p-3 rounded-full bg-[#efeeee] shadow-[3px_3px_6px_#c5c5c5,-3px_-3px_6px_#ffffff] text-blue-500 active:shadow-[inset_2px_2px_4px_#c5c5c5,inset_-2px_-2px_4px_#ffffff] transition-all"
         >
           {isEditing ? <span className="text-xs font-bold px-2">Save</span> : <Edit2 size={16} />}
         </button>

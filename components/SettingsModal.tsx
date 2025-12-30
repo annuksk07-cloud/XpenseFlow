@@ -22,7 +22,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
           <h3 className="text-xl font-bold text-gray-700">App Settings</h3>
           <button 
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-[#efeeee] shadow-[3px_3px_6px_#c5c5c5,-3px_-3px_6px_#ffffff] text-gray-500 active:shadow-[inset_2px_2px_4px_#c5c5c5,inset_-2px_-2px_4px_#ffffff]"
+            className="w-11 h-11 flex items-center justify-center rounded-full bg-[#efeeee] shadow-[3px_3px_6px_#c5c5c5,-3px_-3px_6px_#ffffff] text-gray-500 active:shadow-[inset_2px_2px_4px_#c5c5c5,inset_-2px_-2px_4px_#ffffff]"
           >
             <X size={16} />
           </button>
@@ -41,7 +41,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
                 <button
                   key={code}
                   onClick={() => onUpdate({ baseCurrency: code })}
-                  className={`px-4 py-2 rounded-lg font-bold text-xs transition-all ${
+                  className={`px-4 py-3 rounded-lg font-bold text-xs transition-all ${
                     settings.baseCurrency === code
                       ? 'bg-[#efeeee] text-blue-500 shadow-[inset_3px_3px_6px_#d1d1d1,inset_-3px_-3px_6px_#ffffff]'
                       : 'text-gray-500 shadow-[3px_3px_6px_#d1d1d1,-3px_-3px_6px_#ffffff]'

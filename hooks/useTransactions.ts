@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Transaction, TransactionType, DashboardStats, UserSettings, CURRENCIES, CurrencyCode, PaymentMethod, ToastMessage, ToastType } from '../types';
 
 const STORAGE_KEY = 'expense_tracker_transactions';
@@ -99,36 +99,45 @@ export const useTransactions = () => {
   }, []);
 
   // Advanced Stats Calculation
-  const stats: DashboardStats = transactions.reduce(
-    (acc, curr) => {
-      const amount = Number(curr.amount);
-      if (curr.type === TransactionType.INCOME) {
-        acc.totalIncome += amount;
-        acc.totalBalance += amount;
-      } else {
-        acc.totalExpense += amount;
-        acc.totalBalance -= amount;
-        if (curr.hasTax && curr.taxAmount) {
-          acc.totalTax += Number(curr.taxAmount);
+  const stats: DashboardStats = useMemo(() => {
+    const initialStats = { totalBalance: 0, totalIncome: 0, totalExpense: 0, burnRate: 0, projectedSpend: 0, totalTax: 0 };
+    
+    const calculatedStats = transactions.reduce(
+      (acc, curr) => {
+        const amount = Number(curr.amount);
+        if (curr.type === TransactionType.INCOME) {
+          acc.totalIncome += amount;
+          acc.totalBalance += amount;
+        } else {
+          acc.totalExpense += amount;
+          acc.totalBalance -= amount;
+          if (curr.hasTax && curr.taxAmount) {
+            acc.totalTax += Number(curr.taxAmount);
+          }
         }
-      }
-      return acc;
-    },
-    { totalBalance: 0, totalIncome: 0, totalExpense: 0, burnRate: 0, projectedSpend: 0, totalTax: 0 }
-  );
+        return acc;
+      },
+      initialStats
+    );
 
-  // Forecasting Logic
-  const today = new Date();
-  const dayOfMonth = today.getDate();
-  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-  
-  // Calculate expenses specifically for CURRENT month for accurate burn rate
-  const currentMonthExpenses = transactions
-    .filter(t => t.type === TransactionType.EXPENSE && new Date(t.date).getMonth() === today.getMonth())
-    .reduce((sum, t) => sum + t.amount, 0);
+    // [FIX - Logic] Round totalBalance to prevent floating point inaccuracies
+    calculatedStats.totalBalance = Math.round(calculatedStats.totalBalance * 100) / 100;
 
-  stats.burnRate = dayOfMonth > 0 ? currentMonthExpenses / dayOfMonth : 0;
-  stats.projectedSpend = stats.burnRate * daysInMonth;
+    // Forecasting Logic
+    const today = new Date();
+    const dayOfMonth = today.getDate();
+    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    
+    const currentMonthExpenses = transactions
+      .filter(t => t.type === TransactionType.EXPENSE && new Date(t.date).getMonth() === today.getMonth())
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    calculatedStats.burnRate = dayOfMonth > 0 ? currentMonthExpenses / dayOfMonth : 0;
+    calculatedStats.projectedSpend = calculatedStats.burnRate * daysInMonth;
+    
+    return calculatedStats;
+  }, [transactions]);
+
 
   const exportToCSV = () => {
     const headers = ['Date', 'Title', 'Category', 'Amount (Base)', 'Currency', 'Type', 'Payment Method', 'Has Tax', 'Tax Amount', 'Created At'];

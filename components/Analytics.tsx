@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Transaction, TransactionType } from '../types';
 
 interface AnalyticsProps {
@@ -6,35 +6,41 @@ interface AnalyticsProps {
 }
 
 const Analytics: React.FC<AnalyticsProps> = ({ transactions }) => {
-  const expenses = transactions.filter(t => t.type === TransactionType.EXPENSE);
-  const totalExpense = expenses.reduce((acc, t) => acc + Number(t.amount), 0);
+  const expenses = useMemo(() => transactions.filter(t => t.type === TransactionType.EXPENSE), [transactions]);
+  const totalExpense = useMemo(() => expenses.reduce((acc, t) => acc + Number(t.amount), 0), [expenses]);
 
   // Category Analysis
-  const categories = expenses.reduce((acc, t) => {
-    const category = t.category;
-    const amount = Number(t.amount);
-    acc[category] = (acc[category] || 0) + amount;
-    return acc;
-  }, {} as Record<string, number>);
+  const sortedCategories = useMemo(() => {
+    const categories = expenses.reduce((acc, t) => {
+      const category = t.category;
+      const amount = Number(t.amount);
+      acc[category] = (acc[category] || 0) + amount;
+      return acc;
+    }, {} as Record<string, number>);
 
-  const sortedCategories = Object.entries(categories)
-    .sort((a, b) => Number(b[1]) - Number(a[1]))
-    .slice(0, 4); // Top 4 categories
+    return Object.entries(categories)
+      .sort((a, b) => Number(b[1]) - Number(a[1]))
+      .slice(0, 4); // Top 4 categories
+  }, [expenses]);
 
   // Weekly Activity (Last 7 Days)
-  const last7Days = [...Array(7)].map((_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    return d.toISOString().split('T')[0];
-  }).reverse();
+  const { dailyTotals, last7Days, maxDaily } = useMemo(() => {
+    const last7Days = [...Array(7)].map((_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      return d.toISOString().split('T')[0];
+    }).reverse();
 
-  const dailyTotals = last7Days.map(dateStr => {
-    return expenses
-      .filter(t => t.date.startsWith(dateStr))
-      .reduce((acc, t) => acc + Number(t.amount), 0);
-  });
+    const dailyTotals = last7Days.map(dateStr => {
+      return expenses
+        .filter(t => t.date.startsWith(dateStr))
+        .reduce((acc, t) => acc + Number(t.amount), 0);
+    });
 
-  const maxDaily = Math.max(...dailyTotals, 1); // Avoid div by 0
+    const maxDaily = Math.max(...dailyTotals, 1); // Avoid div by 0
+
+    return { dailyTotals, last7Days, maxDaily };
+  }, [expenses]);
 
   if (transactions.length === 0) return null;
 
@@ -50,7 +56,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ transactions }) => {
             <div key={i} className="flex flex-col items-center gap-2 flex-1 group">
                <div className="relative w-full flex justify-center">
                   <div className="absolute bottom-full mb-1 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-700 text-white text-[10px] px-1 py-0.5 rounded">
-                    ${amount}
+                    ${amount.toFixed(2)}
                   </div>
                   <div 
                     className="w-full max-w-[12px] bg-blue-400 rounded-t-sm shadow-[2px_2px_4px_rgba(0,0,0,0.1)] transition-all duration-500 ease-out hover:bg-blue-500"

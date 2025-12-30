@@ -101,7 +101,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
         
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-[#efeeee] shadow-[5px_5px_10px_#c5c5c5,-5px_-5px_10px_#ffffff] text-gray-500 active:shadow-[inset_5px_5px_10px_#c5c5c5,inset_-5px_-5px_10px_#ffffff] transition-all"
+          className="absolute top-4 right-4 w-12 h-12 flex items-center justify-center rounded-full bg-[#efeeee] shadow-[5px_5px_10px_#c5c5c5,-5px_-5px_10px_#ffffff] text-gray-500 active:shadow-[inset_5px_5px_10px_#c5c5c5,inset_-5px_-5px_10px_#ffffff] transition-all"
         >
           <X size={20} />
         </button>
@@ -118,7 +118,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
             <button
               type="button"
               onClick={() => setType(TransactionType.EXPENSE)}
-              className={`flex-1 py-3 rounded-lg font-bold text-sm transition-all duration-300 ${
+              className={`flex-1 py-4 rounded-lg font-bold text-sm transition-all duration-300 ${
                 type === TransactionType.EXPENSE 
                   ? 'bg-[#efeeee] text-red-500 shadow-[5px_5px_10px_#bebebe,-5px_-5px_10px_#ffffff]' 
                   : 'text-gray-400 hover:text-gray-600'
@@ -129,7 +129,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
             <button
               type="button"
               onClick={() => setType(TransactionType.INCOME)}
-              className={`flex-1 py-3 rounded-lg font-bold text-sm transition-all duration-300 ${
+              className={`flex-1 py-4 rounded-lg font-bold text-sm transition-all duration-300 ${
                 type === TransactionType.INCOME 
                   ? 'bg-[#efeeee] text-green-600 shadow-[5px_5px_10px_#bebebe,-5px_-5px_10px_#ffffff]' 
                   : 'text-gray-400 hover:text-gray-600'

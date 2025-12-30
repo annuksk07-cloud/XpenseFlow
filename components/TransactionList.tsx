@@ -84,12 +84,12 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, onDelet
                 placeholder="Search..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#efeeee] shadow-[inset_3px_3px_6px_#d1d1d1,inset_-3px_-3px_6px_#ffffff] outline-none text-gray-600 placeholder-gray-400 focus:ring-2 focus:ring-blue-100"
+                className="w-full pl-12 pr-4 py-3 h-12 rounded-xl bg-[#efeeee] shadow-[inset_3px_3px_6px_#d1d1d1,inset_-3px_-3px_6px_#ffffff] outline-none text-gray-600 placeholder-gray-400 focus:ring-2 focus:ring-blue-100"
              />
            </div>
            <button 
              onClick={() => setShowFilters(!showFilters)}
-             className={`px-4 rounded-xl shadow-[5px_5px_10px_#d1d1d1,-5px_-5px_10px_#ffffff] transition-all active:scale-95 ${showFilters ? 'text-blue-500' : 'text-gray-500'}`}
+             className={`px-4 h-12 rounded-xl shadow-[5px_5px_10px_#d1d1d1,-5px_-5px_10px_#ffffff] transition-all active:scale-95 ${showFilters ? 'text-blue-500' : 'text-gray-500'}`}
            >
              <SlidersHorizontal size={20} />
            </button>
@@ -134,7 +134,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, onDelet
             <button
               key={range}
               onClick={() => setFilterRange(range)}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+              className={`px-4 py-3 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
                 filterRange === range 
                   ? 'bg-[#efeeee] text-blue-500 shadow-[inset_3px_3px_6px_#d1d1d1,inset_-3px_-3px_6px_#ffffff]' 
                   : 'text-gray-500 hover:text-gray-700'
@@ -191,7 +191,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, onDelet
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               <div className="text-right">
                 <span className={`block font-bold ${
                   t.type === TransactionType.INCOME ? 'text-green-600' : 'text-red-500'
@@ -202,10 +202,10 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, onDelet
               </div>
               <button
                 onClick={() => onDelete(t.id)}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-gray-200 transition-colors opacity-0 group-hover:opacity-100"
+                className="w-11 h-11 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-gray-200 transition-colors"
                 aria-label="Delete transaction"
               >
-                <Trash2 size={14} />
+                <Trash2 size={16} />
               </button>
             </div>
           </div>
