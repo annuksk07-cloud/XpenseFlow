@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Mic, MicOff } from 'lucide-react';
 
 interface VoiceInputProps {
   onTranscript: (text: string) => void;
@@ -7,63 +6,45 @@ interface VoiceInputProps {
 
 const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript }) => {
   const [isListening, setIsListening] = useState(false);
-  const [isSupported, setIsSupported] = useState(true);
-  const [recognition, setRecognition] = useState<any>(null);
+  const [isSupported, setIsSupported] = useState(false);
+  const recognitionRef = React.useRef<any>(null);
 
   useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      const recog = new SpeechRecognition();
-      recog.continuous = false;
-      recog.interimResults = false;
-      recog.lang = 'en-US';
-
-      recog.onresult = (event: any) => {
+    // FIX: Cast window to `any` to access the non-standard SpeechRecognition API and prevent TypeScript errors.
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      setIsSupported(true);
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.lang = 'en-US';
+      recognition.onstart = () => setIsListening(true);
+      recognition.onend = () => setIsListening(false);
+      recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
         onTranscript(transcript);
-        setIsListening(false);
       };
-
-      recog.onerror = () => {
-        setIsListening(false);
-      };
-
-      recog.onend = () => {
-        setIsListening(false);
-      };
-
-      setRecognition(recog);
-    } else {
-      setIsSupported(false);
+      recognitionRef.current = recognition;
     }
   }, [onTranscript]);
 
   const toggleListening = () => {
-    if (!isSupported || !recognition) return;
-
     if (isListening) {
-      recognition.stop();
-      setIsListening(false);
+      recognitionRef.current?.stop();
     } else {
-      recognition.start();
-      setIsListening(true);
+      recognitionRef.current?.start();
     }
   };
-
+  
   if (!isSupported) return null;
 
   return (
     <button
       type="button"
       onClick={toggleListening}
-      className={`p-3 rounded-full transition-all duration-300 ${
-        isListening 
-          ? 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.5)] animate-pulse' 
-          : 'bg-[#efeeee] text-gray-500 shadow-[5px_5px_10px_#d1d1d1,-5px_-5px_10px_#ffffff]'
-      }`}
-      title="Voice Command (e.g. 'Spent 20 on Lunch')"
+      className={`p-3 rounded-full bg-[#efeeee] text-gray-500 shadow-[5px_5px_10px_#d1d1d1,-5px_-5px_10px_#ffffff] transition-colors ${isListening ? 'text-red-500 animate-pulse' : ''}`}
+      aria-label="Start voice input"
     >
-      {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+      <i className={`fa-solid ${isListening ? 'fa-microphone-slash' : 'fa-microphone'}`}></i>
     </button>
   );
 };

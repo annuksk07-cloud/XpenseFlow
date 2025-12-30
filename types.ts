@@ -1,64 +1,51 @@
 export enum TransactionType {
   INCOME = 'INCOME',
-  EXPENSE = 'EXPENSE'
+  EXPENSE = 'EXPENSE',
 }
 
 export enum PaymentMethod {
   CASH = 'CASH',
   CARD = 'CARD',
   WALLET = 'WALLET',
-  TRANSFER = 'TRANSFER'
+  TRANSFER = 'TRANSFER',
 }
 
-export interface Transaction {
-  id: string;
-  title: string;
-  amount: number; // Stored in base currency equivalent for easier calc
-  originalAmount: number; // What user entered
-  currency: string;
-  type: TransactionType;
-  date: string;
-  category: string;
-  tags?: string[];
-  isRecurring?: boolean;
-  // New Fields
-  paymentMethod?: PaymentMethod;
-  hasTax?: boolean;
-  taxAmount?: number;
-  createdAt?: string;
-  updatedAt?: string;
-}
+export type CurrencyCode = 'USD' | 'EUR' | 'GBP' | 'INR' | 'JPY';
 
-export interface DashboardStats {
-  totalBalance: number;
-  totalIncome: number;
-  totalExpense: number;
-  burnRate: number; // Daily spend average
-  projectedSpend: number; // End of month projection
-  totalTax: number;
-}
-
-export interface UserSettings {
-  budgetLimit: number;
-  savingsGoal: number;
-  baseCurrency: string;
-  isPrivacyMode: boolean;
-}
-
-export const CURRENCIES = {
+export const CURRENCIES: Record<CurrencyCode, { symbol: string; rate: number }> = {
   USD: { symbol: '$', rate: 1 },
   EUR: { symbol: '€', rate: 0.92 },
   GBP: { symbol: '£', rate: 0.79 },
   INR: { symbol: '₹', rate: 83.5 },
-  JPY: { symbol: '¥', rate: 150.0 }
+  JPY: { symbol: '¥', rate: 150.0 },
 };
 
-export type CurrencyCode = keyof typeof CURRENCIES;
+export interface Transaction {
+  id: string;
+  title: string;
+  originalAmount: number;
+  amount: number; // Amount in base currency
+  currency: CurrencyCode;
+  type: TransactionType;
+  category: string;
+  date: string; // ISO string
+}
 
-export type ToastType = 'success' | 'error' | 'info';
+export interface Settings {
+  budgetLimit: number;
+  savingsGoal: number;
+  baseCurrency: CurrencyCode;
+  isPrivacyMode: boolean;
+}
+
+export interface Stats {
+  totalBalance: number;
+  totalIncome: number;
+  totalExpense: number;
+}
 
 export interface ToastMessage {
   id: string;
   message: string;
-  type: ToastType;
+  type: 'info' | 'success' | 'error';
 }
