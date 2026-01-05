@@ -1,81 +1,88 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTransactions } from './hooks/useTransactions';
+import { useAuth } from './contexts/AuthContext';
+import { useLanguage } from './contexts/LanguageContext';
+import LoginScreen from './components/LoginScreen';
 import Dashboard from './components/Dashboard';
 import TransactionList from './components/TransactionList';
 import AddTransactionModal from './components/AddTransactionModal';
 import SettingsModal from './components/SettingsModal';
 import Analytics from './components/Analytics';
-import FinancialHealth from './components/FinancialHealth';
 import SubscriptionManager from './components/SubscriptionManager';
 import AddSubscriptionModal from './components/AddSubscriptionModal';
+import FinancialHealth from './components/FinancialHealth';
 import Toast from './components/Toast';
+import BottomNavBar from './components/BottomNavBar';
+import SkeletonLoader from './components/SkeletonLoader';
 
-const App: React.FC = () => {
-  const { transactions, addTransaction, deleteTransaction, subscriptions, addSubscription, deleteSubscription, stats, settings, updateSettings, toasts, removeToast, exportToCSV, backupData, isDataLoaded } = useTransactions();
+const AppContent: React.FC = () => {
+  const { user, loading } = useAuth();
+  const { t } = useLanguage();
+  const { transactions, addTransaction, deleteTransaction, subscriptions, addSubscription, deleteSubscription, stats, settings, updateSettings, toasts, removeToast, exportToCSV, exportToPDF, isDataLoaded } = useTransactions();
+  
   const [isAddModalOpen, setAddModalOpen] = useState(false);
   const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
   const [isAddSubModalOpen, setAddSubModalOpen] = useState(false);
-  const [hasMounted, setHasMounted] = useState(false);
-
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
-  if (!hasMounted || !isDataLoaded) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-[#efeeee]">
-        <div className="w-12 h-12 rounded-full border-4 border-t-blue-500 border-gray-200 animate-spin"></div>
-      </div>
-    );
+  const [activeTab, setActiveTab] = useState('home');
+  
+  if (loading || !isDataLoaded) {
+    return <SkeletonLoader />;
   }
+
+  if (!user) {
+    return <LoginScreen />;
+  }
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'home':
+        return (
+          <>
+            <Dashboard stats={stats} settings={settings} />
+            <FinancialHealth stats={stats} settings={settings} />
+            <SubscriptionManager subscriptions={subscriptions} settings={settings} onDelete={deleteSubscription} onAddClick={() => setAddSubModalOpen(true)} />
+          </>
+        );
+      case 'analytics':
+        return <Analytics transactions={transactions} />;
+      case 'transactions':
+        return <TransactionList transactions={transactions} onDelete={deleteTransaction} settings={settings} />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <>
-      <div className="max-w-md mx-auto min-h-screen bg-[#efeeee] text-gray-700 font-sans flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.05)] relative">
-        <header className="px-6 pt-8 pb-4 flex items-center justify-between">
-          <h1 className="text-2xl font-black tracking-tight">Xpense<span className="text-blue-500">Flow</span></h1>
-          <div className="w-10 h-10 rounded-full bg-[#efeeee] shadow-[5px_5px_10px_#c5c5c5,-5px_-5px_10px_#ffffff]"></div>
+      <div className="max-w-md mx-auto min-h-screen bg-[#F0F2F5] text-[#1A1C2E] font-sans flex flex-col relative">
+        <header className="px-6 pt-8 pb-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-black tracking-tight text-[#1A1C2E]">Xpense<span className="text-blue-600">Flow</span></h1>
+            <button className="w-12 h-12 rounded-full neumorphic-flat flex items-center justify-center active:neumorphic-pressed transition-all">
+              <img src={user.photoURL || `https://i.pravatar.cc/48?u=${user.uid}`} alt="Profile" className="rounded-full w-10 h-10" />
+            </button>
+          </div>
         </header>
 
-        <main className="flex-1 px-6 overflow-y-auto pb-24">
-          <Dashboard stats={stats} settings={settings} onSettingsClick={() => setSettingsModalOpen(true)} />
-          <FinancialHealth stats={stats} settings={settings} updateSettings={updateSettings} />
-          <SubscriptionManager subscriptions={subscriptions} settings={settings} onDelete={deleteSubscription} onAddClick={() => setAddSubModalOpen(true)} />
-          <Analytics transactions={transactions} />
-          <TransactionList transactions={transactions} onDelete={deleteTransaction} settings={settings} />
+        <main className="flex-1 px-6 overflow-y-auto pb-36">
+          {renderContent()}
         </main>
         
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40">
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40">
           <button
             onClick={() => setAddModalOpen(true)}
-            className="w-16 h-16 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-[8px_8px_16px_#c5c5c5,-8px_-8px_16px_#ffffff] active:scale-95 transition-transform"
-            aria-label="Add new transaction"
+            className="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center neumorphic-flat active:neumorphic-pressed !shadow-blue-600/30 transition-all"
+            aria-label={t('fab.addTransaction')}
           >
             <i className="fa-solid fa-plus fa-2x"></i>
           </button>
         </div>
+        <BottomNavBar activeTab={activeTab} setActiveTab={setActiveTab} onSettingsClick={() => setSettingsModalOpen(true)} />
       </div>
 
-      <AddTransactionModal
-        isOpen={isAddModalOpen}
-        onClose={() => setAddModalOpen(false)}
-        onAdd={addTransaction}
-      />
-      
-      <AddSubscriptionModal
-        isOpen={isAddSubModalOpen}
-        onClose={() => setAddSubModalOpen(false)}
-        onAdd={addSubscription}
-      />
-
-      <SettingsModal
-        isOpen={isSettingsModalOpen}
-        onClose={() => setSettingsModalOpen(false)}
-        settings={settings}
-        updateSettings={updateSettings}
-        onExport={exportToCSV}
-        onBackup={backupData}
-      />
+      <AddTransactionModal isOpen={isAddModalOpen} onClose={() => setAddModalOpen(false)} onAdd={addTransaction} />
+      <AddSubscriptionModal isOpen={isAddSubModalOpen} onClose={() => setAddSubModalOpen(false)} onAdd={addSubscription} />
+      <SettingsModal isOpen={isSettingsModalOpen} onClose={() => setSettingsModalOpen(false)} settings={settings} updateSettings={updateSettings} onExportCSV={exportToCSV} onExportPDF={exportToPDF} />
 
       <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[60] flex flex-col gap-2 w-full max-w-sm pointer-events-none px-4">
         {toasts.map(toast => (
@@ -85,5 +92,9 @@ const App: React.FC = () => {
     </>
   );
 };
+
+const App: React.FC = () => (
+  <AppContent />
+);
 
 export default App;

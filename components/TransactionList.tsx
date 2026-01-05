@@ -1,5 +1,6 @@
 import React from 'react';
 import { Transaction, Settings, TransactionType } from '../types';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -21,36 +22,37 @@ const getCategoryIcon = (category: string) => {
 };
 
 const TransactionList: React.FC<TransactionListProps> = ({ transactions, onDelete, settings }) => {
+  const { t } = useLanguage();
   const formatCurrency = (amount: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: settings.baseCurrency }).format(amount);
 
   return (
     <div>
-      <h3 className="text-lg font-bold text-gray-700 px-2 mb-3">{transactions.length} Transaction{transactions.length !== 1 ? 's' : ''}</h3>
+      <h3 className="text-lg font-bold text-[#1A1C2E] px-2 mb-4">{t('transactions.title')}</h3>
       {transactions.length === 0 ? (
-        <div className="text-center py-12 text-gray-400">
-          <div className="w-16 h-16 rounded-full bg-[#efeeee] shadow-[5px_5px_10px_#c5c5c5,-5px_-5px_10px_#ffffff] flex items-center justify-center mx-auto mb-4">
-            <i className="fa-solid fa-inbox fa-lg"></i>
+        <div className="text-center py-16 text-gray-400">
+          <div className="w-20 h-20 rounded-full neumorphic-inset flex items-center justify-center mx-auto mb-4">
+            <i className="fa-solid fa-inbox fa-2x"></i>
           </div>
-          <p>No transactions yet.</p>
+          <p>{t('transactions.noTransactions')}</p>
         </div>
       ) : (
         <div className="space-y-4">
           {transactions.map(t => (
-            <div key={t.id} className="group flex items-center justify-between p-4 rounded-2xl bg-[#efeeee] shadow-[5px_5px_10px_#d1d1d1,-5px_-5px_10px_#ffffff]">
+            <div key={t.id} className="group flex items-center justify-between p-4 neumorphic animate-fade-in-up">
               <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-[inset_3px_3px_6px_#c5c5c5,inset_-3px_-3px_6px_#ffffff] ${t.type === TransactionType.INCOME ? 'text-green-600' : 'text-red-500'}`}>
-                  <i className={`fa-solid ${getCategoryIcon(t.category)}`}></i>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg neumorphic-inset`}>
+                  <i className={`fa-solid ${getCategoryIcon(t.category)} ${t.type === TransactionType.INCOME ? 'text-emerald-500' : 'text-rose-500'}`}></i>
                 </div>
                 <div>
-                  <p className="font-bold text-gray-700 text-sm">{t.title}</p>
-                  <span className="text-xs text-gray-500">{new Date(t.date).toLocaleDateString()}</span>
+                  <p className="font-bold text-[#1A1C2E]">{t.title}</p>
+                  <span className="text-sm text-gray-500">{new Date(t.date).toLocaleDateString()}</span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className={`font-bold ${t.type === TransactionType.INCOME ? 'text-green-600' : 'text-red-500'}`}>
+                <span className={`font-bold text-lg ${t.type === TransactionType.INCOME ? 'text-emerald-500' : 'text-rose-500'}`}>
                   {t.type === TransactionType.INCOME ? '+' : '-'}{formatCurrency(Math.abs(t.amount))}
                 </span>
-                <button onClick={() => onDelete(t.id)} className="w-11 h-11 rounded-full flex items-center justify-center text-gray-400 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-opacity">
+                <button onClick={() => onDelete(t.id)} className="w-10 h-10 rounded-full flex items-center justify-center text-gray-400 opacity-0 group-hover:opacity-100 hover:text-rose-500 transition-all active:scale-95">
                   <i className="fa-solid fa-trash"></i>
                 </button>
               </div>

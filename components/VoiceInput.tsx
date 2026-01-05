@@ -10,7 +10,6 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript }) => {
   const recognitionRef = React.useRef<any>(null);
 
   useEffect(() => {
-    // FIX: Cast window to `any` to access the non-standard SpeechRecognition API and prevent TypeScript errors.
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
       setIsSupported(true);
@@ -41,7 +40,7 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript }) => {
     <button
       type="button"
       onClick={toggleListening}
-      className={`p-3 rounded-full bg-[#efeeee] text-gray-500 shadow-[5px_5px_10px_#d1d1d1,-5px_-5px_10px_#ffffff] transition-colors ${isListening ? 'text-red-500 animate-pulse' : ''}`}
+      className={`p-3 w-12 h-12 flex items-center justify-center text-lg rounded-full neumorphic-flat active:neumorphic-pressed !rounded-full transition-all ${isListening ? 'text-red-500 animate-pulse' : 'text-gray-600'}`}
       aria-label="Start voice input"
     >
       <i className={`fa-solid ${isListening ? 'fa-microphone-slash' : 'fa-microphone'}`}></i>

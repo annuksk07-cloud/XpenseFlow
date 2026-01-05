@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CURRENCIES, CurrencyCode } from '../types';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface AddSubscriptionModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({ isOpen, onC
   const [currency, setCurrency] = useState<CurrencyCode>('USD');
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const { t } = useLanguage();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,26 +42,26 @@ const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({ isOpen, onC
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full max-w-md bg-[#efeeee] rounded-3xl p-6 shadow-[20px_20px_60px_#bebebe,-20px_-20px_60px_#ffffff] relative animate-in fade-in" onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute top-4 right-4 w-12 h-12 flex items-center justify-center rounded-full bg-[#efeeee] shadow-[5px_5px_10px_#c5c5c5,-5px_-5px_10px_#ffffff] text-gray-500"><i className="fa-solid fa-xmark"></i></button>
-        <h3 className="text-xl font-bold text-gray-700 pl-2 mb-6">New Subscription</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/25 backdrop-blur-sm" onClick={onClose}>
+      <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl relative animate-in fade-in" onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"><i className="fa-solid fa-xmark"></i></button>
+        <h3 className="text-xl font-bold text-[#1A1C2E] pl-2 mb-6">{t('modals.newSubscription')}</h3>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-4">
-            <input type="text" placeholder="Subscription Name (e.g. Netflix)" value={name} onChange={e => setName(e.target.value)} required className="w-full px-4 py-3 bg-[#efeeee] rounded-xl outline-none shadow-[inset_5px_5px_10px_#d1d1d1,inset_-5px_-5px_10px_#ffffff] placeholder:text-gray-500 text-gray-800" />
+            <input type="text" placeholder={t('modals.subscriptionNamePlaceholder')} value={name} onChange={e => setName(e.target.value)} required className="w-full px-4 py-3 bg-gray-100 rounded-xl outline-none border border-transparent focus:border-[#00D09C] placeholder:text-gray-400 text-[#2D3748]" />
             <div className="flex gap-3">
-              <input type="number" placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} required className="flex-1 w-full px-4 py-3 bg-[#efeeee] rounded-xl outline-none shadow-[inset_5px_5px_10px_#d1d1d1,inset_-5px_-5px_10px_#ffffff] placeholder:text-gray-500 text-gray-800" />
-              <select value={currency} onChange={e => setCurrency(e.target.value as CurrencyCode)} className="w-1/3 px-4 py-3 bg-[#efeeee] rounded-xl outline-none shadow-[inset_5px_5px_10px_#d1d1d1,inset_-5px_-5px_10px_#ffffff] text-gray-800">{Object.keys(CURRENCIES).map(c => <option key={c} value={c}>{c}</option>)}</select>
+              <input type="number" placeholder={t('modals.amountPlaceholder')} value={amount} onChange={e => setAmount(e.target.value)} required className="flex-1 w-full px-4 py-3 bg-gray-100 rounded-xl outline-none border border-transparent focus:border-[#00D09C] placeholder:text-gray-400 text-[#2D3748]" />
+              <select value={currency} onChange={e => setCurrency(e.target.value as CurrencyCode)} className="w-1/3 px-4 py-3 bg-gray-100 rounded-xl outline-none border border-transparent focus:border-[#00D09C] text-[#2D3748]">{Object.keys(CURRENCIES).map(c => <option key={c} value={c}>{c}</option>)}</select>
             </div>
             <div className="flex gap-3">
-                <select value={billingCycle} onChange={e => setBillingCycle(e.target.value as 'monthly' | 'yearly')} className="w-1/2 px-4 py-3 bg-[#efeeee] rounded-xl outline-none shadow-[inset_5px_5px_10px_#d1d1d1,inset_-5px_-5px_10px_#ffffff] text-gray-800">
-                    <option value="monthly">Monthly</option>
-                    <option value="yearly">Yearly</option>
+                <select value={billingCycle} onChange={e => setBillingCycle(e.target.value as 'monthly' | 'yearly')} className="w-1/2 px-4 py-3 bg-gray-100 rounded-xl outline-none border border-transparent focus:border-[#00D09C] text-[#2D3748]">
+                    <option value="monthly">{t('modals.monthly')}</option>
+                    <option value="yearly">{t('modals.yearly')}</option>
                 </select>
-                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required className="w-1/2 px-4 py-3 bg-[#efeeee] rounded-xl outline-none shadow-[inset_5px_5px_10px_#d1d1d1,inset_-5px_-5px_10px_#ffffff] text-gray-800" />
+                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required className="w-1/2 px-4 py-3 bg-gray-100 rounded-xl outline-none border border-transparent focus:border-[#00D09C] text-[#2D3748]" />
             </div>
           </div>
-          <button type="submit" className="w-full py-4 rounded-xl bg-[#efeeee] text-blue-500 font-bold shadow-[6px_6px_12px_#c5c5c5,-6px_-6px_12px_#ffffff] flex items-center justify-center gap-2"><i className="fa-solid fa-check"></i>Save Subscription</button>
+          <button type="submit" className="w-full py-4 rounded-xl bg-[#00D09C] text-white font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"><i className="fa-solid fa-check"></i>{t('modals.saveSubscription')}</button>
         </form>
       </div>
     </div>
