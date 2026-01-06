@@ -19,7 +19,7 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, settings }) => {
             <i className="fa-solid fa-wallet"></i>
             <h2 className="font-medium text-sm tracking-wider uppercase">{t('dashboard.totalBalance')}</h2>
         </div>
-        <p className={`text-5xl font-bold text-[#1A1C2E] transition-all duration-300 ${privacyClass}`}>
+        <p className={`text-4xl sm:text-5xl font-bold text-[#1A1C2E] transition-all duration-300 ${privacyClass}`}>
           {formatCurrency(stats.totalBalance, { minimumFractionDigits: 2 })}
         </p>
       </div>

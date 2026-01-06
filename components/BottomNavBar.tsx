@@ -19,7 +19,7 @@ const NavItem: React.FC<{ icon: string; label: string; isActive: boolean; onClic
 const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, setActiveTab, onSettingsClick }) => {
   const { t } = useLanguage();
   return (
-    <div className="fixed bottom-4 inset-x-4 h-20 bg-[#F0F2F5] rounded-3xl z-50" style={{boxShadow: '5px 5px 10px #d1d9e6, -5px -5px 10px #ffffff'}}>
+    <div className="fixed bottom-4 inset-x-4 h-20 bg-[#F0F2F5]/90 backdrop-blur-md rounded-3xl z-50" style={{boxShadow: '5px 5px 10px #d1d9e6, -5px -5px 10px #ffffff'}}>
       <div className="flex justify-around items-center h-full">
         <NavItem icon="fa-home" label={t('nav.home')} isActive={activeTab === 'home'} onClick={() => setActiveTab('home')} />
         <NavItem icon="fa-chart-pie" label={t('nav.analytics')} isActive={activeTab === 'analytics'} onClick={() => setActiveTab('analytics')} />

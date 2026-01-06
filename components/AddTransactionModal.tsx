@@ -121,7 +121,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
       const { data: { text } } = await worker.recognize(file);
       parseReceiptText(text);
     } catch (error) {
-      console.error('OCR Error:', String(error)); // Log as string to prevent circular structure issues
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('OCR Error:', errorMessage);
       alert('Could not read receipt. Please try a clearer image.');
     } finally {
       if (worker) {
