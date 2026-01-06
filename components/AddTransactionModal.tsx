@@ -104,26 +104,32 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
     setScanStatus('Initializing AI');
     setScanProgress(0);
 
-    const worker = await Tesseract.createWorker('eng', 1, {
-      logger: (m: any) => {
-        setScanStatus(m.status);
-        if (m.status === 'recognizing text') {
-          setScanProgress(m.progress);
-        }
-      },
-    });
+    let worker: any = null;
 
     try {
+      worker = await Tesseract.createWorker('eng', 1, {
+        logger: (m: any) => {
+          if (m && typeof m.status === 'string') {
+            setScanStatus(m.status);
+          }
+          if (m && m.status === 'recognizing text' && typeof m.progress === 'number') {
+            setScanProgress(m.progress);
+          }
+        },
+      });
+
       const { data: { text } } = await worker.recognize(file);
       parseReceiptText(text);
     } catch (error) {
-      console.error('OCR Error:', error);
+      console.error('OCR Error:', String(error)); // Log as string to prevent circular structure issues
       alert('Could not read receipt. Please try a clearer image.');
     } finally {
-      await worker.terminate();
+      if (worker) {
+        await worker.terminate();
+      }
       setIsScanning(false);
       // Clear file input value to allow scanning the same file again
-      if(fileInputRef.current) {
+      if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     }

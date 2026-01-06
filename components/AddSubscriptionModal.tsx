@@ -43,25 +43,25 @@ const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({ isOpen, onC
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/25 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl relative animate-in fade-in" onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"><i className="fa-solid fa-xmark"></i></button>
+      <div className="w-full max-w-md bg-[#F0F2F5] rounded-3xl p-6 shadow-2xl relative animate-in fade-in" onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full neumorphic-flat active:neumorphic-pressed !rounded-full transition-all text-gray-500"><i className="fa-solid fa-xmark"></i></button>
         <h3 className="text-xl font-bold text-[#1A1C2E] pl-2 mb-6">{t('modals.newSubscription')}</h3>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-4">
-            <input type="text" placeholder={t('modals.subscriptionNamePlaceholder')} value={name} onChange={e => setName(e.target.value)} required className="w-full px-4 py-3 bg-gray-100 rounded-xl outline-none border border-transparent focus:border-[#00D09C] placeholder:text-gray-400 text-[#2D3748]" />
+            <input type="text" placeholder={t('modals.subscriptionNamePlaceholder')} value={name} onChange={e => setName(e.target.value)} required className="w-full px-4 py-3 neumorphic-inset outline-none placeholder:text-gray-400 text-[#1A1C2E]" />
             <div className="flex gap-3">
-              <input type="number" placeholder={t('modals.amountPlaceholder')} value={amount} onChange={e => setAmount(e.target.value)} required className="flex-1 w-full px-4 py-3 bg-gray-100 rounded-xl outline-none border border-transparent focus:border-[#00D09C] placeholder:text-gray-400 text-[#2D3748]" />
-              <select value={currency} onChange={e => setCurrency(e.target.value as CurrencyCode)} className="w-1/3 px-4 py-3 bg-gray-100 rounded-xl outline-none border border-transparent focus:border-[#00D09C] text-[#2D3748]">{Object.keys(CURRENCIES).map(c => <option key={c} value={c}>{c}</option>)}</select>
+              <input type="number" placeholder={t('modals.amountPlaceholder')} value={amount} onChange={e => setAmount(e.target.value)} required className="flex-1 w-full px-4 py-3 neumorphic-inset outline-none placeholder:text-gray-400 text-[#1A1C2E]" />
+              <select value={currency} onChange={e => setCurrency(e.target.value as CurrencyCode)} className="w-1/3 px-4 py-3 neumorphic-inset outline-none text-[#1A1C2E]">{Object.keys(CURRENCIES).map(c => <option key={c} value={c}>{c}</option>)}</select>
             </div>
             <div className="flex gap-3">
-                <select value={billingCycle} onChange={e => setBillingCycle(e.target.value as 'monthly' | 'yearly')} className="w-1/2 px-4 py-3 bg-gray-100 rounded-xl outline-none border border-transparent focus:border-[#00D09C] text-[#2D3748]">
+                <select value={billingCycle} onChange={e => setBillingCycle(e.target.value as 'monthly' | 'yearly')} className="w-1/2 px-4 py-3 neumorphic-inset outline-none text-[#1A1C2E]">
                     <option value="monthly">{t('modals.monthly')}</option>
                     <option value="yearly">{t('modals.yearly')}</option>
                 </select>
-                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required className="w-1/2 px-4 py-3 bg-gray-100 rounded-xl outline-none border border-transparent focus:border-[#00D09C] text-[#2D3748]" />
+                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required className="w-1/2 px-4 py-3 neumorphic-inset outline-none text-[#1A1C2E]" />
             </div>
           </div>
-          <button type="submit" className="w-full py-4 rounded-xl bg-[#00D09C] text-white font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"><i className="fa-solid fa-check"></i>{t('modals.saveSubscription')}</button>
+          <button type="submit" className="w-full py-4 rounded-xl neumorphic-flat active:neumorphic-pressed !rounded-xl bg-[#00D09C] text-white font-bold transition-all flex items-center justify-center gap-2"><i className="fa-solid fa-check"></i>{t('modals.saveSubscription')}</button>
         </form>
       </div>
     </div>

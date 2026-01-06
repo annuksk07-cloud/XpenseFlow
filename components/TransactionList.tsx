@@ -52,7 +52,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, onDelet
                 <span className={`font-bold text-lg ${t.type === TransactionType.INCOME ? 'text-emerald-500' : 'text-rose-500'}`}>
                   {t.type === TransactionType.INCOME ? '+' : '-'}{formatCurrency(Math.abs(t.amount))}
                 </span>
-                <button onClick={() => onDelete(t.id)} className="w-10 h-10 rounded-full flex items-center justify-center text-gray-400 opacity-0 group-hover:opacity-100 hover:text-rose-500 transition-all active:scale-95">
+                <button onClick={() => onDelete(t.id)} className="w-10 h-10 rounded-full flex items-center justify-center text-gray-500 opacity-0 group-hover:opacity-100 neumorphic-flat !rounded-full active:neumorphic-pressed hover:text-rose-500 transition-all">
                   <i className="fa-solid fa-trash"></i>
                 </button>
               </div>

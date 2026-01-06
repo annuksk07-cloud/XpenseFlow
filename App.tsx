@@ -71,7 +71,7 @@ const AppContent: React.FC = () => {
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40">
           <button
             onClick={() => setAddModalOpen(true)}
-            className="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center neumorphic-flat active:neumorphic-pressed !shadow-blue-600/30 transition-all"
+            className="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center neumorphic-flat active:neumorphic-pressed !shadow-blue-600/30 transition-all shadow-[8px_8px_16px_#d1d9e6,-8px_-8px_16px_#ffffff]"
             aria-label={t('fab.addTransaction')}
           >
             <i className="fa-solid fa-plus fa-2x"></i>
