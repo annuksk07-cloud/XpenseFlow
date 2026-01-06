@@ -49,7 +49,7 @@ export const useTransactions = () => {
       setTransactions(fetchedTransactions);
       if (!isDataLoaded) setIsDataLoaded(true);
     }, (error) => {
-      console.error("Error fetching transactions:", error);
+      console.error("Error fetching transactions:", error.message);
       addToast('Could not sync transactions.', 'error');
     });
 
@@ -57,7 +57,7 @@ export const useTransactions = () => {
       const fetchedSubscriptions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Subscription));
       setSubscriptions(fetchedSubscriptions);
     }, (error) => {
-      console.error("Error fetching subscriptions:", error);
+      console.error("Error fetching subscriptions:", error.message);
       addToast('Could not sync subscriptions.', 'error');
     });
 
@@ -66,7 +66,7 @@ export const useTransactions = () => {
         setSettings(doc.data() as Settings);
       }
     }, (error) => {
-      console.error("Error fetching settings:", error);
+      console.error("Error fetching settings:", error.message);
       addToast('Could not sync settings.', 'error');
     });
 
@@ -95,8 +95,8 @@ export const useTransactions = () => {
     try {
       await addDoc(collection(db, 'users', user.uid, 'transactions'), newTransaction);
       addToast('Transaction added successfully!', 'success');
-    } catch (error) {
-      console.error("Error adding transaction: ", error);
+    } catch (error: any) {
+      console.error("Error adding transaction: ", error.message);
       addToast('Failed to add transaction.', 'error');
     }
   };
@@ -106,8 +106,8 @@ export const useTransactions = () => {
     try {
       await deleteDoc(doc(db, 'users', user.uid, 'transactions', id));
       addToast('Transaction removed.', 'info');
-    } catch(error) {
-      console.error("Error removing transaction: ", error);
+    } catch(error: any) {
+      console.error("Error removing transaction: ", error.message);
       addToast('Failed to remove transaction.', 'error');
     }
   };
@@ -117,8 +117,8 @@ export const useTransactions = () => {
     try {
       await addDoc(collection(db, 'users', user.uid, 'subscriptions'), data);
       addToast('Subscription added!', 'success');
-    } catch (error) {
-       console.error("Error adding subscription: ", error);
+    } catch (error: any) {
+       console.error("Error adding subscription: ", error.message);
        addToast('Failed to add subscription.', 'error');
     }
   };
@@ -128,8 +128,8 @@ export const useTransactions = () => {
      try {
       await deleteDoc(doc(db, 'users', user.uid, 'subscriptions', id));
       addToast('Subscription removed.', 'info');
-    } catch(error) {
-      console.error("Error removing subscription: ", error);
+    } catch(error: any) {
+      console.error("Error removing subscription: ", error.message);
       addToast('Failed to remove subscription.', 'error');
     }
   };
@@ -140,8 +140,8 @@ export const useTransactions = () => {
     try {
       await setDoc(doc(db, 'users', user.uid, 'settings', 'config'), updatedSettings);
       addToast('Settings updated!', 'success');
-    } catch (error) {
-      console.error("Error updating settings: ", error);
+    } catch (error: any) {
+      console.error("Error updating settings: ", error.message);
       addToast('Failed to update settings.', 'error');
     }
   };
@@ -217,6 +217,7 @@ export const useTransactions = () => {
     doc.autoTable({
       body: [
         ['Total Income', new Intl.NumberFormat('en-US', { style: 'currency', currency: settings.baseCurrency }).format(stats.totalIncome)],
+        // FIX: Corrected casing for NumberFormat and property names
         ['Total Expense', new Intl.NumberFormat('en-US', { style: 'currency', currency: settings.baseCurrency }).format(stats.totalExpense)],
         ['Net Balance', new Intl.NumberFormat('en-US', { style: 'currency', currency: settings.baseCurrency }).format(stats.totalBalance)],
       ],

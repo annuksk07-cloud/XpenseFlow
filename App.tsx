@@ -64,11 +64,11 @@ const AppContent: React.FC = () => {
           </div>
         </header>
 
-        <main className="flex-1 px-6 overflow-y-auto pb-40">
+        <main className="flex-1 px-6 overflow-y-auto pb-28">
           {renderContent()}
         </main>
         
-        <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-60">
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-60">
           <button
             onClick={() => setAddModalOpen(true)}
             className="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center neumorphic-flat active:neumorphic-pressed !shadow-blue-600/30 transition-all shadow-[8px_8px_16px_#d1d9e6,-8px_-8px_16px_#ffffff]"

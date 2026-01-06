@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>XpenseFlow - Professional Expense Management</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -20,9 +20,22 @@
     <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
 
     <style>
+      html, body {
+        overscroll-behavior: none;
+        overflow-x: hidden;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
       body {
         background-color: #F0F2F5;
         font-family: 'Inter', sans-serif;
+        min-height: 100vh;
+        min-height: 100dvh; /* Dynamic viewport height */
+      }
+      #root {
+        min-height: 100vh;
+        min-height: 100dvh;
       }
       ::-webkit-scrollbar { width: 8px; }
       ::-webkit-scrollbar-track { background: #F0F2F5; }
