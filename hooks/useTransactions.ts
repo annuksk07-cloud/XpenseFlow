@@ -1,13 +1,21 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { db } from '../firebaseConfig';
-import { collection, query, where, onSnapshot, addDoc, deleteDoc, doc, orderBy, setDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, addDoc, deleteDoc, doc, orderBy, setDoc } from 'firebase/firestore';
 import { Transaction, Settings, Stats, ToastMessage, TransactionType, CURRENCIES, CurrencyCode, Subscription } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 
-// Use jsPDF from the window object
 declare const window: any;
 
 const generateUUID = () => crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => (Math.random() * 16 | 0).toString(16));
+
+/**
+ * Sanitizes complex error objects to prevent "Circular structure to JSON" crashes
+ */
+const sanitizeError = (err: any): string => {
+  if (typeof err === 'string') return err;
+  if (err?.message) return err.message;
+  return 'An unknown error occurred';
+};
 
 export const useTransactions = () => {
   const { user } = useAuth();
@@ -32,42 +40,51 @@ export const useTransactions = () => {
   };
 
   useEffect(() => {
-    if (!user) {
+    if (!user?.uid) {
       setTransactions([]);
       setSubscriptions([]);
       setIsDataLoaded(true);
       return;
     }
     
-    // Firestore listeners
-    const transactionsQuery = query(collection(db, 'users', user.uid, 'transactions'), orderBy('date', 'desc'));
-    const subscriptionsQuery = query(collection(db, 'users', user.uid, 'subscriptions'), orderBy('nextDueDate', 'asc'));
+    // Define paths
+    const transactionsPath = collection(db, 'users', user.uid, 'transactions');
+    const subscriptionsPath = collection(db, 'users', user.uid, 'subscriptions');
     const settingsDocRef = doc(db, 'users', user.uid, 'settings', 'config');
 
+    // Queries
+    const transactionsQuery = query(transactionsPath, orderBy('date', 'desc'));
+    const subscriptionsQuery = query(subscriptionsPath, orderBy('nextDueDate', 'asc'));
+
+    // Listeners
     const unsubscribeTransactions = onSnapshot(transactionsQuery, (snapshot) => {
-      const fetchedTransactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction));
-      setTransactions(fetchedTransactions);
-      if (!isDataLoaded) setIsDataLoaded(true);
+      const fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction));
+      setTransactions(fetched);
+      setIsDataLoaded(true);
     }, (error) => {
-      console.error("Error fetching transactions:", error.message);
-      addToast('Could not sync transactions.', 'error');
+      const msg = sanitizeError(error);
+      console.error("Transactions Permission Error:", msg);
+      addToast(`Transactions: ${msg}. Check Firebase Rules.`, 'error');
+      setIsDataLoaded(true); // Don't hang the app
     });
 
     const unsubscribeSubscriptions = onSnapshot(subscriptionsQuery, (snapshot) => {
-      const fetchedSubscriptions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Subscription));
-      setSubscriptions(fetchedSubscriptions);
+      const fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Subscription));
+      setSubscriptions(fetched);
     }, (error) => {
-      console.error("Error fetching subscriptions:", error.message);
-      addToast('Could not sync subscriptions.', 'error');
+      const msg = sanitizeError(error);
+      console.error("Subscriptions Permission Error:", msg);
+      addToast(`Subscriptions: ${msg}`, 'error');
     });
 
-    const unsubscribeSettings = onSnapshot(settingsDocRef, (doc) => {
-      if (doc.exists()) {
-        setSettings(doc.data() as Settings);
+    const unsubscribeSettings = onSnapshot(settingsDocRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setSettings(docSnap.data() as Settings);
       }
     }, (error) => {
-      console.error("Error fetching settings:", error.message);
-      addToast('Could not sync settings.', 'error');
+      const msg = sanitizeError(error);
+      console.error("Settings Permission Error:", msg);
+      addToast(`Settings: ${msg}`, 'error');
     });
 
     return () => {
@@ -75,73 +92,65 @@ export const useTransactions = () => {
       unsubscribeSubscriptions();
       unsubscribeSettings();
     };
-  }, [user, isDataLoaded, addToast]);
-
+  }, [user?.uid, addToast]); // Removed isDataLoaded from dependencies to avoid loops
 
   const convertCurrency = (amount: number, from: CurrencyCode, to: CurrencyCode) => {
-      const fromRate = CURRENCIES[from]?.rate || 1;
-      const toRate = CURRENCIES[to]?.rate || 1;
-      return (amount / fromRate) * toRate;
+    const fromRate = CURRENCIES[from]?.rate || 1;
+    const toRate = CURRENCIES[to]?.rate || 1;
+    return (amount / fromRate) * toRate;
   };
 
   const addTransaction = async (data: Omit<Transaction, 'id' | 'amount' | 'date'>) => {
-    if (!user) return;
+    if (!user?.uid) return;
     const baseAmount = convertCurrency(data.originalAmount, data.currency, settings.baseCurrency);
-    const newTransaction = {
-      ...data,
-      amount: baseAmount,
-      date: new Date().toISOString(),
-    };
+    const newTransaction = { ...data, amount: baseAmount, date: new Date().toISOString() };
     try {
       await addDoc(collection(db, 'users', user.uid, 'transactions'), newTransaction);
-      addToast('Transaction added successfully!', 'success');
+      addToast('Transaction added!', 'success');
     } catch (error: any) {
-      console.error("Error adding transaction: ", error.message);
+      console.error("Add Transaction Error:", sanitizeError(error));
       addToast('Failed to add transaction.', 'error');
     }
   };
 
   const deleteTransaction = async (id: string) => {
-    if (!user) return;
+    if (!user?.uid) return;
     try {
       await deleteDoc(doc(db, 'users', user.uid, 'transactions', id));
       addToast('Transaction removed.', 'info');
     } catch(error: any) {
-      console.error("Error removing transaction: ", error.message);
+      console.error("Delete Transaction Error:", sanitizeError(error));
       addToast('Failed to remove transaction.', 'error');
     }
   };
   
   const addSubscription = async (data: Omit<Subscription, 'id'>) => {
-    if (!user) return;
+    if (!user?.uid) return;
     try {
       await addDoc(collection(db, 'users', user.uid, 'subscriptions'), data);
       addToast('Subscription added!', 'success');
     } catch (error: any) {
-       console.error("Error adding subscription: ", error.message);
+       console.error("Add Subscription Error:", sanitizeError(error));
        addToast('Failed to add subscription.', 'error');
     }
   };
   
   const deleteSubscription = async (id: string) => {
-    if (!user) return;
+    if (!user?.uid) return;
      try {
       await deleteDoc(doc(db, 'users', user.uid, 'subscriptions', id));
       addToast('Subscription removed.', 'info');
     } catch(error: any) {
-      console.error("Error removing subscription: ", error.message);
-      addToast('Failed to remove subscription.', 'error');
+      console.error("Delete Subscription Error:", sanitizeError(error));
     }
   };
 
   const updateSettings = async (newSettings: Partial<Settings>) => {
-    if (!user) return;
-    const updatedSettings = { ...settings, ...newSettings };
+    if (!user?.uid) return;
     try {
-      await setDoc(doc(db, 'users', user.uid, 'settings', 'config'), updatedSettings);
-      addToast('Settings updated!', 'success');
+      await setDoc(doc(db, 'users', user.uid, 'settings', 'config'), { ...settings, ...newSettings });
     } catch (error: any) {
-      console.error("Error updating settings: ", error.message);
+      console.error("Update Settings Error:", sanitizeError(error));
       addToast('Failed to update settings.', 'error');
     }
   };
@@ -160,75 +169,46 @@ export const useTransactions = () => {
   }, [transactions]);
 
   const exportToCSV = () => {
-    if (transactions.length === 0) {
-      addToast('No data to export', 'error');
-      return;
-    }
+    if (transactions.length === 0) return;
     const headers = 'Date,Title,Category,Type,Amount,Currency\n';
-    const rows = transactions.map(t =>
-      [ new Date(t.date).toLocaleDateString(), t.title, t.category, t.type, t.originalAmount, t.currency ].join(',')
-    ).join('\n');
+    const rows = transactions.map(t => [new Date(t.date).toLocaleDateString(), t.title, t.category, t.type, t.originalAmount, t.currency].join(',')).join('\n');
     const blob = new Blob([headers + rows], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `XpenseFlow_Export_${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `XpenseFlow_Export.csv`;
     link.click();
-    addToast('Data exported to CSV', 'success');
+    addToast('CSV exported.', 'success');
   };
 
   const exportToPDF = () => {
-    if (transactions.length === 0) {
-      addToast('No data to export', 'error');
-      return;
-    }
+    if (transactions.length === 0) return;
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    const docPdf = new jsPDF();
+    docPdf.setFontSize(18);
+    docPdf.text("XpenseFlow Transaction Report", 14, 22);
+    docPdf.setFontSize(11);
+    docPdf.setTextColor(100);
+    docPdf.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
     
-    doc.setFontSize(20);
-    doc.text("XpenseFlow Transaction Report", 14, 22);
-    doc.setFontSize(12);
-    doc.text(`Report Generated: ${new Date().toLocaleDateString()}`, 14, 30);
+    const tableRows = transactions.map(t => [
+      new Date(t.date).toLocaleDateString(),
+      t.title,
+      t.category,
+      t.type,
+      `${CURRENCIES[t.currency].symbol}${t.originalAmount.toFixed(2)}`
+    ]);
 
-    const tableColumn = ["Date", "Title", "Category", "Type", "Amount"];
-    const tableRows: any[] = [];
-
-    transactions.forEach(t => {
-      const transactionData = [
-        new Date(t.date).toLocaleDateString(),
-        t.title,
-        t.category,
-        t.type,
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: t.currency }).format(t.originalAmount)
-      ];
-      tableRows.push(transactionData);
-    });
-
-    doc.autoTable({
-      head: [tableColumn],
+    docPdf.autoTable({
+      head: [["Date", "Title", "Category", "Type", "Amount"]],
       body: tableRows,
       startY: 40,
       theme: 'grid',
-      headStyles: { fillColor: [22, 160, 133] }
+      headStyles: { fillColor: [59, 130, 246] }
     });
     
-    const finalY = doc.autoTable.previous.finalY;
-    doc.setFontSize(12);
-    doc.text("Summary", 14, finalY + 15);
-    doc.autoTable({
-      body: [
-        ['Total Income', new Intl.NumberFormat('en-US', { style: 'currency', currency: settings.baseCurrency }).format(stats.totalIncome)],
-        // FIX: Corrected casing for NumberFormat and property names
-        ['Total Expense', new Intl.NumberFormat('en-US', { style: 'currency', currency: settings.baseCurrency }).format(stats.totalExpense)],
-        ['Net Balance', new Intl.NumberFormat('en-US', { style: 'currency', currency: settings.baseCurrency }).format(stats.totalBalance)],
-      ],
-      startY: finalY + 20,
-      theme: 'plain'
-    });
-
-    doc.save(`XpenseFlow_Report_${new Date().toISOString().split('T')[0]}.pdf`);
-    addToast('Data exported to PDF', 'success');
+    docPdf.save(`XpenseFlow_Report.pdf`);
+    addToast('PDF exported.', 'success');
   };
-
 
   return { transactions, addTransaction, deleteTransaction, subscriptions, addSubscription, deleteSubscription, stats, settings, updateSettings, toasts, removeToast, exportToCSV, exportToPDF, isDataLoaded };
 };

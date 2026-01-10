@@ -25,7 +25,8 @@ const AppContent: React.FC = () => {
   const [isAddSubModalOpen, setAddSubModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
   
-  if (loading || !isDataLoaded) {
+  // Resolve infinite loader if user is logged in but data failed
+  if (loading || (!isDataLoaded && user)) {
     return <SkeletonLoader />;
   }
 
@@ -37,64 +38,64 @@ const AppContent: React.FC = () => {
     switch (activeTab) {
       case 'home':
         return (
-          <>
+          <div className="page-transition space-y-8">
             <Dashboard stats={stats} settings={settings} />
             <FinancialHealth stats={stats} settings={settings} />
             <SubscriptionManager subscriptions={subscriptions} settings={settings} onDelete={deleteSubscription} onAddClick={() => setAddSubModalOpen(true)} />
-          </>
+          </div>
         );
       case 'analytics':
-        return <Analytics transactions={transactions} />;
+        return <div className="page-transition"><Analytics transactions={transactions} /></div>;
       case 'transactions':
-        return <TransactionList transactions={transactions} onDelete={deleteTransaction} settings={settings} />;
+        return <div className="page-transition"><TransactionList transactions={transactions} onDelete={deleteTransaction} settings={settings} /></div>;
       default:
         return null;
     }
   };
 
   return (
-    <>
-      <div className="max-w-md mx-auto min-h-screen bg-[#F0F2F5] text-[#1A1C2E] font-sans flex flex-col relative">
-        <header className="px-6 pt-8 pb-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-black tracking-tight text-[#1A1C2E]">Xpense<span className="text-blue-600">Flow</span></h1>
-            <button className="w-12 h-12 rounded-full neumorphic-flat flex items-center justify-center active:neumorphic-pressed transition-all">
-              <img src={user.photoURL || `https://i.pravatar.cc/48?u=${user.uid}`} alt="Profile" className="rounded-full w-10 h-10" />
-            </button>
-          </div>
-        </header>
-
-        <main className="flex-1 px-6 overflow-y-auto pb-28">
-          {renderContent()}
-        </main>
-        
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-60">
-          <button
-            onClick={() => setAddModalOpen(true)}
-            className="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center neumorphic-flat active:neumorphic-pressed !shadow-blue-600/30 transition-all shadow-[8px_8px_16px_#d1d9e6,-8px_-8px_16px_#ffffff]"
-            aria-label={t('fab.addTransaction')}
-          >
-            <i className="fa-solid fa-plus fa-2x"></i>
+    <div className="max-w-md mx-auto min-h-[100dvh] bg-[#F0F2F5] text-[#1A1C2E] flex flex-col relative overflow-hidden">
+      <header className="px-6 pt-12 pb-4 shrink-0">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-black tracking-tight text-[#1A1C2E]">Xpense<span className="text-blue-600">Flow</span></h1>
+          <button className="w-11 h-11 rounded-full neumorphic-flat flex items-center justify-center active:scale-90 transition-all overflow-hidden border-2 border-white ring-4 ring-black/5">
+            <img src={user.photoURL || `https://i.pravatar.cc/48?u=${user.uid}`} alt="Profile" className="w-full h-full object-cover" />
           </button>
         </div>
-        <BottomNavBar activeTab={activeTab} setActiveTab={setActiveTab} onSettingsClick={() => setSettingsModalOpen(true)} />
-      </div>
+      </header>
 
+      {/* Main scroll area with huge padding bottom for floating UI components */}
+      <main className="flex-1 px-6 overflow-y-auto pb-40 scroll-smooth">
+        {renderContent()}
+      </main>
+      
+      {/* Centered Floating Action Button above the Nav bar */}
+      <div className="fixed bottom-[92px] left-1/2 -translate-x-1/2 z-[1100] pb-[env(safe-area-inset-bottom)]">
+        <button
+          onClick={() => setAddModalOpen(true)}
+          className="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center neumorphic shadow-blue-600/30 active:scale-95 transition-all shadow-xl"
+          aria-label={t('fab.addTransaction')}
+        >
+          <i className="fa-solid fa-plus fa-xl"></i>
+        </button>
+      </div>
+      
+      <BottomNavBar activeTab={activeTab} setActiveTab={setActiveTab} onSettingsClick={() => setSettingsModalOpen(true)} />
+
+      {/* Modals are higher z-index than Nav */}
       <AddTransactionModal isOpen={isAddModalOpen} onClose={() => setAddModalOpen(false)} onAdd={addTransaction} />
       <AddSubscriptionModal isOpen={isAddSubModalOpen} onClose={() => setAddSubModalOpen(false)} onAdd={addSubscription} />
       <SettingsModal isOpen={isSettingsModalOpen} onClose={() => setSettingsModalOpen(false)} settings={settings} updateSettings={updateSettings} onExportCSV={exportToCSV} onExportPDF={exportToPDF} />
 
-      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[60] flex flex-col gap-2 w-full max-w-sm pointer-events-none px-4">
+      {/* Toast notifications at the very top */}
+      <div className="fixed top-14 left-0 right-0 z-[2000] flex flex-col items-center gap-2 pointer-events-none px-6">
         {toasts.map(toast => (
           <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => removeToast(toast.id)} />
         ))}
       </div>
-    </>
+    </div>
   );
 };
 
-const App: React.FC = () => (
-  <AppContent />
-);
-
+const App: React.FC = () => <AppContent />;
 export default App;
