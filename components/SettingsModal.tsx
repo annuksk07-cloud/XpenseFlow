@@ -27,44 +27,51 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/25 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full max-w-md bg-[#F0F2F5] rounded-t-3xl sm:rounded-3xl p-6 shadow-lg animate-slide-in-bottom" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm px-4" onClick={onClose}>
+      <div className="w-full max-w-md bg-[#F0F2F5] rounded-t-[40px] sm:rounded-[40px] p-8 shadow-2xl animate-in slide-in-from-bottom duration-300 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-8">
-          <h3 className="text-xl font-bold text-[#1A1C2E]">{t('modals.settingsTitle')}</h3>
-          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center neumorphic-flat active:neumorphic-pressed !rounded-full transition-all text-gray-500"><i className="fa-solid fa-xmark"></i></button>
+          <h3 className="text-2xl font-black text-[#1A1C2E]">{t('modals.settingsTitle')}</h3>
+          <button onClick={onClose} className="w-11 h-11 flex items-center justify-center neumorphic-flat active:neumorphic-pressed !rounded-full transition-all text-gray-500"><i className="fa-solid fa-xmark"></i></button>
         </div>
-        <div className="space-y-6">
-          <div>
-            <label className="font-bold text-sm text-gray-600 mb-2 block"><i className="fa-solid fa-language mr-2"></i>{t('modals.language')}</label>
-            <div className="flex gap-2 overflow-x-auto pb-2">{LANGUAGES.map(lang => (
-              <button key={lang.code} onClick={() => setLanguage(lang.code)} className={`px-4 py-3 rounded-lg font-bold text-xs transition-all ${language === lang.code ? 'neumorphic-pressed !rounded-lg text-blue-600' : 'neumorphic-flat !rounded-lg text-gray-700'}`}>
-                {lang.name}
-              </button>
-            ))}</div>
-          </div>
 
-          <div>
-            <label className="font-bold text-sm text-gray-600 mb-2 block"><i className="fa-solid fa-globe mr-2"></i>{t('modals.baseCurrency')}</label>
-            <div className="flex gap-2 overflow-x-auto pb-2">{Object.keys(CURRENCIES).map(code => (
-               <button key={code} onClick={() => updateSettings({ baseCurrency: code as CurrencyCode })} className={`px-4 py-3 rounded-lg font-bold text-xs transition-all ${settings.baseCurrency === code ? 'neumorphic-pressed !rounded-lg text-blue-600' : 'neumorphic-flat !rounded-lg text-gray-700'}`}>
-                {code}
-              </button>
-            ))}</div>
-          </div>
+        <div className="space-y-8">
+          <section>
+            <label className="font-bold text-xs uppercase tracking-widest text-gray-400 mb-4 block">{t('modals.language')}</label>
+            <div className="grid grid-cols-2 gap-3">
+              {LANGUAGES.map(lang => (
+                <button key={lang.code} onClick={() => setLanguage(lang.code)} className={`px-4 py-3 rounded-2xl font-bold text-sm transition-all ${language === lang.code ? 'neumorphic-pressed !rounded-2xl text-blue-600' : 'neumorphic-flat !rounded-2xl text-gray-700'}`}>
+                  {lang.name}
+                </button>
+              ))}
+            </div>
+          </section>
 
-          <div className="flex items-center justify-between p-4 rounded-xl neumorphic-inset">
-             <div><p className="font-bold text-sm text-[#2D3748]">{t('modals.stealthMode')}</p><p className="text-xs text-gray-500">{t('modals.stealthModeDesc')}</p></div>
-             <button onClick={() => updateSettings({ isPrivacyMode: !settings.isPrivacyMode })} className={`w-12 h-6 rounded-full relative transition-colors ${settings.isPrivacyMode ? 'bg-blue-600' : 'neumorphic-pressed !rounded-full'}`}><div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 ${settings.isPrivacyMode ? 'left-7' : 'left-1'}`}></div></button>
-          </div>
+          <section>
+            <label className="font-bold text-xs uppercase tracking-widest text-gray-400 mb-4 block">{t('modals.baseCurrency')}</label>
+            <div className="grid grid-cols-3 gap-3">
+              {Object.keys(CURRENCIES).map(code => (
+                 <button key={code} onClick={() => updateSettings({ baseCurrency: code as CurrencyCode })} className={`px-3 py-3 rounded-2xl font-bold text-sm transition-all ${settings.baseCurrency === code ? 'neumorphic-pressed !rounded-2xl text-blue-600' : 'neumorphic-flat !rounded-2xl text-gray-700'}`}>
+                  {code}
+                </button>
+              ))}
+            </div>
+          </section>
 
-          <div className="space-y-3 pt-2">
-            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t('modals.dataBackup')}</h4>
-            <button onClick={onExportCSV} className="w-full text-left p-4 rounded-xl neumorphic-flat !rounded-xl active:neumorphic-pressed transition-all text-[#2D3748] font-semibold"><i className="fa-solid fa-file-csv mr-3 text-emerald-600"></i>{t('modals.exportCSV')}</button>
-            <button onClick={onExportPDF} className="w-full text-left p-4 rounded-xl neumorphic-flat !rounded-xl active:neumorphic-pressed transition-all text-[#2D3748] font-semibold"><i className="fa-solid fa-file-pdf mr-3 text-rose-600"></i>{t('modals.exportPDF')}</button>
-          </div>
+          <section className="flex items-center justify-between p-5 rounded-3xl neumorphic-inset">
+             <div><p className="font-bold text-sm text-[#1A1C2E]">{t('modals.stealthMode')}</p><p className="text-[10px] text-gray-500">{t('modals.stealthModeDesc')}</p></div>
+             <button onClick={() => updateSettings({ isPrivacyMode: !settings.isPrivacyMode })} className={`w-14 h-7 rounded-full relative transition-colors ${settings.isPrivacyMode ? 'bg-blue-600' : 'neumorphic-pressed !rounded-full'}`}><div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all duration-300 ${settings.isPrivacyMode ? 'left-8' : 'left-1'}`}></div></button>
+          </section>
 
-           <div className="border-t border-gray-300/50 pt-5">
-             <button onClick={logout} className="w-full text-left p-4 rounded-xl neumorphic-flat !rounded-xl active:neumorphic-pressed transition-all text-rose-600 font-bold"><i className="fa-solid fa-right-from-bracket mr-3"></i>{t('modals.signOut')}</button>
+          <section className="space-y-4">
+            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{t('modals.dataBackup')}</h4>
+            <div className="grid grid-cols-1 gap-3">
+              <button onClick={onExportCSV} className="w-full flex items-center p-5 rounded-3xl neumorphic-flat !rounded-3xl active:neumorphic-pressed transition-all text-[#1A1C2E] font-bold text-sm"><i className="fa-solid fa-file-csv mr-4 text-emerald-600 text-lg"></i>{t('modals.exportCSV')}</button>
+              <button onClick={onExportPDF} className="w-full flex items-center p-5 rounded-3xl neumorphic-flat !rounded-3xl active:neumorphic-pressed transition-all text-[#1A1C2E] font-bold text-sm"><i className="fa-solid fa-file-pdf mr-4 text-rose-600 text-lg"></i>{t('modals.exportPDF')}</button>
+            </div>
+          </section>
+
+           <div className="pt-6 pb-8">
+             <button onClick={logout} className="w-full flex items-center justify-center p-5 rounded-3xl neumorphic-flat !rounded-3xl active:neumorphic-pressed transition-all text-rose-600 font-black text-sm"><i className="fa-solid fa-right-from-bracket mr-3"></i>{t('modals.signOut')}</button>
            </div>
         </div>
       </div>

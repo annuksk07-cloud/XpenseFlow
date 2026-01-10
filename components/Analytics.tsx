@@ -44,16 +44,20 @@ const Analytics: React.FC<AnalyticsProps> = ({ transactions }) => {
             labels: last7Days.map(d => new Date(d).toLocaleDateString(undefined, { weekday: 'short' })),
             datasets: [{
               label: t('analytics.dailyExpense'), data: dailyTotals,
-              backgroundColor: 'rgba(0, 208, 156, 0.5)',
-              borderColor: 'rgba(0, 208, 156, 1)',
-              borderWidth: 1, borderRadius: 4,
-              hoverBackgroundColor: 'rgba(0, 208, 156, 0.8)',
+              backgroundColor: 'rgba(59, 130, 246, 0.5)',
+              borderColor: 'rgba(59, 130, 246, 1)',
+              borderWidth: 1, borderRadius: 8,
+              hoverBackgroundColor: 'rgba(59, 130, 246, 0.8)',
             }]
           },
           options: {
-              responsive: true, maintainAspectRatio: false,
+              responsive: true, 
+              maintainAspectRatio: false, // Critical for mobile
               plugins: { legend: { display: false } },
-              scales: { y: { beginAtZero: true, grid: { color: '#e5e7eb' } }, x: { grid: { display: false } } }
+              scales: { 
+                y: { beginAtZero: true, grid: { color: '#e5e7eb' }, ticks: { font: { size: 10 } } }, 
+                x: { grid: { display: false }, ticks: { font: { size: 10 } } } 
+              }
           }
         });
       }
@@ -81,9 +85,10 @@ const Analytics: React.FC<AnalyticsProps> = ({ transactions }) => {
             }]
           },
           options: {
-            responsive: true, maintainAspectRatio: false,
+            responsive: true, 
+            maintainAspectRatio: false, // Critical for mobile
             plugins: {
-              legend: { position: 'right', labels: { boxWidth: 12, padding: 15 } },
+              legend: { position: 'bottom', labels: { boxWidth: 8, padding: 10, font: { size: 10 } } },
               tooltip: { callbacks: { label: (c) => `${c.label}: ${new Intl.NumberFormat().format(c.raw as number)}` } }
             },
             cutout: '70%',
@@ -98,26 +103,29 @@ const Analytics: React.FC<AnalyticsProps> = ({ transactions }) => {
     };
   }, [transactions, t]);
   
-  if (transactions.length === 0) return null;
+  if (transactions.length === 0) return (
+    <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+      <i className="fa-solid fa-chart-line fa-3x mb-4 opacity-20"></i>
+      <p>{t('analytics.noExpenseData')}</p>
+    </div>
+  );
 
   return (
-    <div className="mb-8">
-      <h3 className="text-lg font-bold text-[#1A1C2E] px-2 mb-4">{t('analytics.spendAnalysis')}</h3>
-      <div className="p-6 rounded-2xl bg-white border border-gray-100 shadow-sm mb-6 h-64">
-        {hasExpenses ? (
-          <canvas ref={barChartRef}></canvas>
-        ) : (
-          <div className="flex items-center justify-center h-full text-center text-gray-400 text-sm">{t('analytics.noExpenseData')}</div>
-        )}
-      </div>
+    <div className="space-y-8 pb-10">
+      <section>
+        <h3 className="text-lg font-bold text-[#1A1C2E] px-2 mb-4">{t('analytics.spendAnalysis')}</h3>
+        <div className="neumorphic p-6 h-[280px]">
+          {hasExpenses ? <canvas ref={barChartRef}></canvas> : <div className="h-full flex items-center justify-center text-gray-400 text-sm">{t('analytics.noExpenseData')}</div>}
+        </div>
+      </section>
       
       {hasExpenses && (
-        <>
+        <section>
           <h3 className="text-lg font-bold text-[#1A1C2E] px-2 mb-4">{t('analytics.categoryBreakdown')}</h3>
-          <div className="p-6 rounded-2xl bg-white border border-gray-100 shadow-sm h-72">
+          <div className="neumorphic p-6 h-[340px]">
             <canvas ref={doughnutChartRef}></canvas>
           </div>
-        </>
+        </section>
       )}
     </div>
   );

@@ -18,9 +18,9 @@ const ScanningOverlay: React.FC<{ progress: number; status: string }> = ({ progr
     <div className="neumorphic p-8 text-center w-3/4">
       <div className="mb-4 text-blue-600 animate-spin"><i className="fa-solid fa-spinner fa-2x"></i></div>
       <p className="font-bold text-[#1A1C2E] mb-2">Scanning Receipt</p>
-      <p className="text-sm text-gray-500 mb-4 capitalize">{status}...</p>
+      <p className="text-sm text-gray-500 mb-4 capitalize">{String(status)}...</p>
       <div className="w-full bg-gray-200 rounded-full h-2.5 neumorphic-inset">
-        <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${progress * 100}%` }}></div>
+        <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${Math.min(100, progress * 100)}%` }}></div>
       </div>
     </div>
   </div>
@@ -69,27 +69,25 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
   };
 
   const handleVoiceTranscript = (text: string) => {
+    if (typeof text !== 'string') return;
     setTitle(text.charAt(0).toUpperCase() + text.slice(1));
     const amountMatch = text.match(/(\d+(\.\d{1,2})?)/);
     if (amountMatch) setAmount(amountMatch[0]);
   };
 
   const parseReceiptText = (text: string) => {
+    if (!text || typeof text !== 'string') return;
     const lines = text.split('\n').filter(line => line.trim().length > 1);
     
-    // Find Merchant (heuristic: first meaningful line)
     const merchant = lines[0] || 'Scanned Receipt';
-
-    // Find Total Amount (heuristic: largest number, often near "total")
     const amountRegex = /(\d{1,5}[.,]\d{2})/g;
     let amounts = text.match(amountRegex)?.map(v => parseFloat(v.replace(',', '.'))) || [];
     const totalAmount = amounts.length > 0 ? Math.max(...amounts) : 0;
     
-    // Find Category
     const categoryKey = classifyExpense(text);
     const localizedCategory = t(`categories.${categoryKey}`);
 
-    setTitle(merchant);
+    setTitle(String(merchant).substring(0, 50));
     setAmount(totalAmount.toFixed(2));
     if (CATEGORIES.includes(localizedCategory)) {
       setCategory(localizedCategory);
@@ -101,7 +99,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
     if (!file || !Tesseract) return;
 
     setIsScanning(true);
-    setScanStatus('Initializing AI');
+    setScanStatus('Initializing');
     setScanProgress(0);
 
     let worker: any = null;
@@ -109,11 +107,16 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
     try {
       worker = await Tesseract.createWorker('eng', 1, {
         logger: (m: any) => {
-          if (m && typeof m.status === 'string') {
-            setScanStatus(m.status);
-          }
-          if (m && m.status === 'recognizing text' && typeof m.progress === 'number') {
-            setScanProgress(m.progress);
+          if (!m) return;
+          try {
+            if (typeof m.status === 'string') {
+              setScanStatus(m.status);
+            }
+            if (m.status === 'recognizing text' && typeof m.progress === 'number') {
+              setScanProgress(m.progress);
+            }
+          } catch (e) {
+            // Ignore internal logger errors to prevent crash
           }
         },
       });
@@ -121,25 +124,24 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
       const { data: { text } } = await worker.recognize(file);
       parseReceiptText(text);
     } catch (error: any) {
-      console.error('OCR Error:', error.message);
-      alert('Could not read receipt. Please try a clearer image.');
+      const errorMsg = error?.message || 'OCR Failed';
+      console.error('OCR Error: ' + String(errorMsg));
+      alert('Could not read receipt clearly. Please try again.');
     } finally {
       if (worker) {
-        await worker.terminate();
+        try { await worker.terminate(); } catch (e) {}
       }
       setIsScanning(false);
-      // Clear file input value to allow scanning the same file again
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     }
   };
 
-
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/25 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-black/25 backdrop-blur-sm" onClick={onClose}>
       <div className="w-full max-w-md bg-[#F0F2F5] rounded-3xl p-6 shadow-2xl relative animate-in fade-in" onClick={e => e.stopPropagation()}>
         {isScanning && <ScanningOverlay progress={scanProgress} status={scanStatus} />}
         <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" style={{ display: 'none' }} />

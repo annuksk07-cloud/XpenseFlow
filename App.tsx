@@ -25,7 +25,6 @@ const AppContent: React.FC = () => {
   const [isAddSubModalOpen, setAddSubModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
   
-  // Resolve infinite loader if user is logged in but data failed
   if (loading || (!isDataLoaded && user)) {
     return <SkeletonLoader />;
   }
@@ -54,26 +53,25 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto min-h-[100dvh] bg-[#F0F2F5] text-[#1A1C2E] flex flex-col relative overflow-hidden">
-      <header className="px-6 pt-12 pb-4 shrink-0">
+    <>
+      <header className="px-6 pt-14 pb-4 shrink-0 bg-[#F0F2F5]/80 backdrop-blur-md z-40">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-black tracking-tight text-[#1A1C2E]">Xpense<span className="text-blue-600">Flow</span></h1>
-          <button className="w-11 h-11 rounded-full neumorphic-flat flex items-center justify-center active:scale-90 transition-all overflow-hidden border-2 border-white ring-4 ring-black/5">
+          <button className="w-11 h-11 rounded-full neumorphic-flat flex items-center justify-center active:scale-90 transition-all overflow-hidden border-2 border-white">
             <img src={user.photoURL || `https://i.pravatar.cc/48?u=${user.uid}`} alt="Profile" className="w-full h-full object-cover" />
           </button>
         </div>
       </header>
 
-      {/* Main scroll area with huge padding bottom for floating UI components */}
-      <main className="flex-1 px-6 overflow-y-auto pb-40 scroll-smooth">
+      <main className="scroll-container px-6 pt-4">
         {renderContent()}
       </main>
       
-      {/* Centered Floating Action Button above the Nav bar */}
-      <div className="fixed bottom-[92px] left-1/2 -translate-x-1/2 z-[1100] pb-[env(safe-area-inset-bottom)]">
+      {/* Positioned higher to clear labels and notch safe area */}
+      <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-[1100]">
         <button
           onClick={() => setAddModalOpen(true)}
-          className="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center neumorphic shadow-blue-600/30 active:scale-95 transition-all shadow-xl"
+          className="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center neumorphic shadow-xl shadow-blue-600/30 active:scale-95 transition-all border-4 border-[#F0F2F5]"
           aria-label={t('fab.addTransaction')}
         >
           <i className="fa-solid fa-plus fa-xl"></i>
@@ -82,18 +80,16 @@ const AppContent: React.FC = () => {
       
       <BottomNavBar activeTab={activeTab} setActiveTab={setActiveTab} onSettingsClick={() => setSettingsModalOpen(true)} />
 
-      {/* Modals are higher z-index than Nav */}
       <AddTransactionModal isOpen={isAddModalOpen} onClose={() => setAddModalOpen(false)} onAdd={addTransaction} />
       <AddSubscriptionModal isOpen={isAddSubModalOpen} onClose={() => setAddSubModalOpen(false)} onAdd={addSubscription} />
       <SettingsModal isOpen={isSettingsModalOpen} onClose={() => setSettingsModalOpen(false)} settings={settings} updateSettings={updateSettings} onExportCSV={exportToCSV} onExportPDF={exportToPDF} />
 
-      {/* Toast notifications at the very top */}
       <div className="fixed top-14 left-0 right-0 z-[2000] flex flex-col items-center gap-2 pointer-events-none px-6">
         {toasts.map(toast => (
           <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => removeToast(toast.id)} />
         ))}
       </div>
-    </div>
+    </>
   );
 };
 
