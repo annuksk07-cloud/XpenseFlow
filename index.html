@@ -28,14 +28,14 @@
         width: 100%;
         margin: 0;
         padding: 0;
-        overflow: hidden; /* Lock main body scroll */
-        position: fixed; /* Essential for mobile lock */
-        /* Native App Optimization */
+        overflow: hidden;
+        position: fixed;
         -webkit-tap-highlight-color: transparent;
         -webkit-touch-callout: none;
         user-select: none;
         -webkit-user-select: none;
         background-color: var(--app-bg);
+        overscroll-behavior-y: none;
       }
       #root {
         height: 100dvh;
@@ -49,7 +49,7 @@
         overflow-y: auto;
         overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
-        padding-bottom: 140px; /* Safe space for FAB + Nav */
+        padding-bottom: 200px; /* Increased buffer for oversized central dock */
       }
       .neumorphic {
         background: #F0F2F5;
@@ -73,6 +73,14 @@
       @keyframes fade-in-up {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
+      }
+      .shimmer {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer-anim 1.5s infinite;
+      }
+      @keyframes shimmer-anim {
+        to { background-position: -200% 0; }
       }
     </style>
     <script type="importmap">

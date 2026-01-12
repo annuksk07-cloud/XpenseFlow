@@ -63,22 +63,17 @@ const AppContent: React.FC = () => {
         </div>
       </header>
 
+      {/* Extreme padding to ensure bottom content clears the oversized notched FAB */}
       <main className="scroll-container px-6 pt-4">
         {renderContent()}
       </main>
       
-      {/* Positioned higher to clear labels and notch safe area */}
-      <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-[1100]">
-        <button
-          onClick={() => setAddModalOpen(true)}
-          className="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center neumorphic shadow-xl shadow-blue-600/30 active:scale-95 transition-all border-4 border-[#F0F2F5]"
-          aria-label={t('fab.addTransaction')}
-        >
-          <i className="fa-solid fa-plus fa-xl"></i>
-        </button>
-      </div>
-      
-      <BottomNavBar activeTab={activeTab} setActiveTab={setActiveTab} onSettingsClick={() => setSettingsModalOpen(true)} />
+      <BottomNavBar 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        onSettingsClick={() => setSettingsModalOpen(true)}
+        onAddClick={() => setAddModalOpen(true)}
+      />
 
       <AddTransactionModal isOpen={isAddModalOpen} onClose={() => setAddModalOpen(false)} onAdd={addTransaction} />
       <AddSubscriptionModal isOpen={isAddSubModalOpen} onClose={() => setAddSubModalOpen(false)} onAdd={addSubscription} />
