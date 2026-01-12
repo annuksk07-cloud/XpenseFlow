@@ -14,6 +14,7 @@ import FinancialHealth from './components/FinancialHealth';
 import Toast from './components/Toast';
 import BottomNavBar from './components/BottomNavBar';
 import SkeletonLoader from './components/SkeletonLoader';
+import PWAInstallBanner from './components/PWAInstallBanner';
 
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
@@ -74,6 +75,8 @@ const AppContent: React.FC = () => {
         {renderContent()}
       </main>
       
+      <PWAInstallBanner />
+
       <BottomNavBar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
