@@ -56,14 +56,20 @@ const AppContent: React.FC = () => {
     <>
       <header className="px-6 pt-14 pb-4 shrink-0 bg-[#F0F2F5]/80 backdrop-blur-md z-40">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-black tracking-tight text-[#1A1C2E]">Xpense<span className="text-blue-600">Flow</span></h1>
-          <button className="w-11 h-11 rounded-full neumorphic-flat flex items-center justify-center active:scale-90 transition-all overflow-hidden border-2 border-white">
-            <img src={user.photoURL || `https://i.pravatar.cc/48?u=${user.uid}`} alt="Profile" className="w-full h-full object-cover" />
-          </button>
+          <h1 className="text-3xl font-black tracking-tight text-[#1A1C2E]">
+            Xpense<span className="text-[#2563EB]">Flow</span>
+          </h1>
+          {/* Branded Official Logo - Replacing Profile Pic */}
+          <div className="w-11 h-11 rounded-full logo-raised flex items-center justify-center border-2 border-white overflow-hidden active:scale-95 transition-all">
+            <img 
+              src="https://img.icons8.com/color/96/xd.png" 
+              alt="XpenseFlow Branded Logo" 
+              className="w-full h-full object-cover" 
+            />
+          </div>
         </div>
       </header>
 
-      {/* Extreme padding to ensure bottom content clears the oversized notched FAB */}
       <main className="scroll-container px-6 pt-4">
         {renderContent()}
       </main>
