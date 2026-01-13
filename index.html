@@ -15,7 +15,7 @@
     <meta name="theme-color" content="#3B82F6">
     
     <!-- INLINE WEB APP MANIFEST (DATA URI BASE64) -->
-    <!-- Corrected Content: {"name":"XpenseFlow","short_name":"XpenseFlow","description":"Professional Expense Management","start_url":".","display":"standalone","background_color":"#F0F2F5","theme_color":"#3B82F6","icons":[{"src":"https://img.sanishtech.com/u/4e2e11616c139405209c8eefc1543bd0.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"https://img.sanishtech.com/u/4e2e11616c139405209c8eefc1543bd0.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]} -->
+    <!-- Content: {"name":"XpenseFlow","short_name":"XpenseFlow","description":"Professional Expense Management","start_url":".","display":"standalone","background_color":"#F0F2F5","theme_color":"#3B82F6","icons":[{"src":"https://img.sanishtech.com/u/4e2e11616c139405209c8eefc1543bd0.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"https://img.sanishtech.com/u/4e2e11616c139405209c8eefc1543bd0.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]} -->
     <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiWHBlbnNlRmxvdyIsInNob3J0X25hbWUiOiJYcGVuc2VGbG93IiwiZGVzY3JpcHRpb24iOiJQcm9mZXNzaW9uYWwgRXhwZW5zZSBNYW5hZ2VtZW50Iiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNGMEYyRjUiLCJ0aGVtZV9jb2xvciI6IiMzQjgyRjYiLCJpY29ucyI6W3sic3JjIjoiaHR0cHM6Ly9pbWcuc2FuaXNodGVjaC5jb20vdS80ZTJlMTE2MTZjMTM5NDA1MjA5YzhlZWZjMTU0M2JkMC5wbmciLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIiwicHVycG9zZSI6ImFueSBtYXNrYWJsZSJ9LHsic3JjIjoiaHR0cHM6Ly9pbWcuc2FuaXNodGVjaC5jb20vdS80ZTJlMTE2MTZjMTM5NDA1MjA5YzhlZWZjMTU0M2JkMC5wbmciLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIiwicHVycG9zZSI6ImFueSBtYXNrYWJsZSJ9XX0=">
 
     <title>XpenseFlow - Professional Expense Management</title>
@@ -66,8 +66,9 @@
         overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
         padding-bottom: 200px;
+        z-index: 0;
       }
-      /* Enhanced Neumorphism for high-end look */
+      /* Neumorphism styles */
       .neumorphic {
         background: #F0F2F5;
         border-radius: 28px;
@@ -112,12 +113,11 @@
               event.respondWith(fetch(event.request).catch(() => {}));
             });
           `;
-          
           try {
             const blob = new Blob([swCode], { type: 'application/javascript' });
             const swUrl = URL.createObjectURL(blob);
             const registration = await navigator.serviceWorker.register(swUrl);
-            console.log('XpenseFlow Service Worker Registered via Blob');
+            console.log('XpenseFlow Service Worker Registered (Inline Blob Mode)');
           } catch (err) {
             console.debug('Service Worker Registration skipped (Environment limitation)');
           }

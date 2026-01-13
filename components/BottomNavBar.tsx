@@ -21,14 +21,14 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, setActiveTab, on
   const { t } = useLanguage();
   
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[1000] px-0 pb-0 pointer-events-none">
+    <div className="fixed bottom-0 left-0 right-0 z-40 px-0 pb-0 pointer-events-none">
       <div className="max-w-md mx-auto relative pointer-events-auto">
         
-        {/* Fintech Oversized FAB - Anchored deeper into the dock */}
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-8 z-[1100]">
+        {/* Fintech Oversized FAB */}
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-8 z-50">
           <button
             onClick={onAddClick}
-            className="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-[0_12px_24px_rgba(37,99,235,0.4),0_0_15px_rgba(37,99,235,0.2)] border-4 border-white active:scale-90 transition-all group"
+            className="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-[0_12px_24px_rgba(37,99,235,0.4)] border-4 border-white active:scale-90 transition-all group"
             aria-label={t('fab.addTransaction')}
           >
             <i className="fa-solid fa-plus text-2xl group-active:rotate-90 transition-transform duration-300"></i>
@@ -51,17 +51,13 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, setActiveTab, on
             />
           </svg>
           
-          {/* Glass Overlay for the SVG Path to simulate backdrop blur */}
           <div className="absolute bottom-0 left-0 w-full h-[85px] bg-[#F0F2F5]/20 backdrop-blur-2xl rounded-t-[32px] pointer-events-none" style={{ clipPath: 'path("M0 20C0 8.95431 8.95431 0 20 0H140C150 0 155 0 160 5C165 10 170 35 187.5 35C205 35 210 10 215 5C220 0 225 0 235 0H355C366.046 0 375 8.95431 375 20V85H0V20Z")' }}></div>
 
           {/* Navigation Items Grid */}
           <nav className="grid grid-cols-5 w-full h-[85px] px-2 relative z-10 pb-[env(safe-area-inset-bottom)]">
             <NavItem icon="fa-house" label={t('nav.home')} isActive={activeTab === 'home'} onClick={() => setActiveTab('home')} />
             <NavItem icon="fa-chart-pie" label={t('nav.analytics')} isActive={activeTab === 'analytics'} onClick={() => setActiveTab('analytics')} />
-            
-            {/* Center Spacer for Notched FAB */}
             <div className="w-full"></div>
-            
             <NavItem icon="fa-list-ul" label={t('nav.history')} isActive={activeTab === 'transactions'} onClick={() => setActiveTab('transactions')} />
             <NavItem icon="fa-cog" label={t('nav.settings')} isActive={false} onClick={onSettingsClick} />
           </nav>

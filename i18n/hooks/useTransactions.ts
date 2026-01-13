@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { db } from '../../firebaseConfig';
 import { collection, query, onSnapshot, addDoc, deleteDoc, doc, orderBy, setDoc } from 'firebase/firestore';
@@ -10,33 +9,24 @@ declare const window: any;
 const generateUUID = () => crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => (Math.random() * 16 | 0).toString(16));
 
 /**
- * ULTRA-SAFE ERROR SANITIZER
- * Strictly extracts primitive strings from error objects to prevent "Circular structure to JSON" crashes.
- * It avoids calling String() or JSON.stringify() on the root object.
+ * CRASH-PROOF ERROR SANITIZER
+ * Only extracts primitive string messages to prevent "Circular structure to JSON" crashes.
  */
 const sanitizeError = (err: any): string => {
   if (!err) return 'Unknown error';
   if (typeof err === 'string') return err;
   
   try {
-    // Priority 1: Known Error Message
-    if (err.message && typeof err.message === 'string') return err.message;
-    // Priority 2: Error Code
-    if (err.code && typeof err.code === 'string') return `Error: ${err.code}`;
-    // Priority 3: Description
-    if (err.description && typeof err.description === 'string') return err.description;
-    
-    // Fallback: If it's a simple object, try to identify it without recursion
-    const typeName = err.constructor?.name || typeof err;
-    return `An error occurred (Type: ${typeName})`;
+    const message = err.message || err.code || 'System Error';
+    return typeof message === 'string' ? message : 'System Error';
   } catch (e) {
-    return 'An un-serializable system error occurred';
+    return 'Un-serializable Error';
   }
 };
 
 /**
  * DATA PURIFICATION
- * Ensures Firestore data contains only serializable primitives.
+ * Ensures Firestore data is converted to plain, serializable objects.
  */
 const sanitizeFirestoreData = (data: any): any => {
   const sanitized: any = {};
@@ -47,10 +37,8 @@ const sanitizeFirestoreData = (data: any): any => {
     } else if (val instanceof Date) {
       sanitized[key] = val.toISOString();
     } else if (typeof val === 'object' && val.toDate && typeof val.toDate === 'function') {
-      // Handle Firestore Timestamps
       sanitized[key] = val.toDate().toISOString();
     } else {
-      // Convert complex objects (References, etc) to strings
       sanitized[key] = String(val);
     }
   }
@@ -103,8 +91,7 @@ export const useTransactions = () => {
       setTransactions(fetched);
       setIsDataLoaded(true);
     }, (error) => {
-      const msg = sanitizeError(error);
-      addToast(`Sync Failed: ${msg}`, 'error');
+      addToast(`Sync Failed: ${sanitizeError(error)}`, 'error');
       setIsDataLoaded(true);
     });
 
@@ -115,8 +102,7 @@ export const useTransactions = () => {
       } as Subscription));
       setSubscriptions(fetched);
     }, (error) => {
-      const msg = sanitizeError(error);
-      addToast(`Subscriptions Sync Error: ${msg}`, 'error');
+      addToast(`Subscriptions Sync Error: ${sanitizeError(error)}`, 'error');
     });
 
     const unsubscribeSettings = onSnapshot(settingsDocRef, (docSnap) => {
@@ -124,8 +110,7 @@ export const useTransactions = () => {
         setSettings(docSnap.data() as Settings);
       }
     }, (error) => {
-      const msg = sanitizeError(error);
-      addToast(`Settings Sync Error: ${msg}`, 'error');
+      addToast(`Settings Sync Error: ${sanitizeError(error)}`, 'error');
     });
 
     return () => {

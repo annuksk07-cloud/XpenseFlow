@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useTransactions } from './i18n/hooks/useTransactions';
 import { useAuth } from './AuthContext';
@@ -56,12 +55,11 @@ const AppContent: React.FC = () => {
 
   return (
     <>
-      <header className="px-6 pt-14 pb-4 shrink-0 bg-[#F0F2F5]/80 backdrop-blur-md z-40">
+      <header className="px-6 pt-14 pb-4 shrink-0 bg-[#F0F2F5]/80 backdrop-blur-md z-30 relative">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-black tracking-tight text-[#1A1C2E]">
             Xpense<span className="text-[#2563EB]">Flow</span>
           </h1>
-          {/* Branded Official Logo - Replacing Profile Pic */}
           <div className="w-11 h-11 rounded-full logo-raised flex items-center justify-center border-2 border-white overflow-hidden active:scale-95 transition-all">
             <img 
               src="https://img.sanishtech.com/u/4e2e11616c139405209c8eefc1543bd0.png" 
@@ -72,7 +70,7 @@ const AppContent: React.FC = () => {
         </div>
       </header>
 
-      <main className="scroll-container px-6 pt-4">
+      <main className="scroll-container px-6 pt-4 pb-40 z-0 relative">
         {renderContent()}
       </main>
       
