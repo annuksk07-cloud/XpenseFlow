@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { TransactionType, CURRENCIES, CurrencyCode } from '../types';
 import VoiceInput from './VoiceInput';
@@ -116,7 +117,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
               setScanProgress(m.progress);
             }
           } catch (e) {
-            // Ignore internal logger errors to prevent crash
+            // Internal logger events can occasionally be complex
           }
         },
       });
@@ -124,8 +125,9 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
       const { data: { text } } = await worker.recognize(file);
       parseReceiptText(text);
     } catch (error: any) {
-      const errorMsg = error?.message || 'OCR Failed';
-      console.error('OCR Error: ' + String(errorMsg));
+      // Explicitly convert error to string to prevent circular reference errors in logging
+      const errorMsg = error?.message || String(error) || 'OCR Failed';
+      console.error('OCR Error:', errorMsg);
       alert('Could not read receipt clearly. Please try again.');
     } finally {
       if (worker) {

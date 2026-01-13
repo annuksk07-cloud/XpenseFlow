@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
-import { useTransactions } from './hooks/useTransactions';
-import { useAuth } from './contexts/AuthContext';
+import { useTransactions } from './i18n/hooks/useTransactions';
+import { useAuth } from './AuthContext';
 import { useLanguage } from './contexts/LanguageContext';
 import LoginScreen from './components/LoginScreen';
 import Dashboard from './components/Dashboard';

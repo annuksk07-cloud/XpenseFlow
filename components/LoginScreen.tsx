@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const LoginScreen: React.FC = () => {

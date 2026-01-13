@@ -1,36 +1,60 @@
+
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { db } from '../firebaseConfig';
+import { db } from '../../firebaseConfig';
 import { collection, query, onSnapshot, addDoc, deleteDoc, doc, orderBy, setDoc } from 'firebase/firestore';
-import { Transaction, Settings, Stats, ToastMessage, TransactionType, CURRENCIES, CurrencyCode, Subscription } from '../types';
-import { useAuth } from '../contexts/AuthContext';
+import { Transaction, Settings, Stats, ToastMessage, TransactionType, CURRENCIES, CurrencyCode, Subscription } from '../../types';
+import { useAuth } from '../../AuthContext';
 
 declare const window: any;
 
 const generateUUID = () => crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => (Math.random() * 16 | 0).toString(16));
 
 /**
- * PRODUCTION-GRADE ERROR SANITIZER
- * Prevents "Circular structure to JSON" crashes by strictly extracting primitive strings
+ * ULTRA-SAFE ERROR SANITIZER
+ * Strictly extracts primitive strings from error objects to prevent "Circular structure to JSON" crashes.
+ * It avoids calling String() or JSON.stringify() on the root object.
  */
 const sanitizeError = (err: any): string => {
+  if (!err) return 'Unknown error';
+  if (typeof err === 'string') return err;
+  
   try {
-    if (!err) return 'Unknown error';
-    if (typeof err === 'string') return err;
+    // Priority 1: Known Error Message
+    if (err.message && typeof err.message === 'string') return err.message;
+    // Priority 2: Error Code
+    if (err.code && typeof err.code === 'string') return `Error: ${err.code}`;
+    // Priority 3: Description
+    if (err.description && typeof err.description === 'string') return err.description;
     
-    // Extract common error properties as primitives
-    const message = err.message || err.description;
-    const code = err.code || err.status;
-    
-    if (message && code) return `[${code}] ${message}`;
-    if (message) return String(message);
-    if (code) return `Error Code: ${code}`;
-    
-    // Fallback to basic string conversion
-    const fallback = String(err);
-    return fallback.includes('[object') ? 'Internal system error' : fallback;
+    // Fallback: If it's a simple object, try to identify it without recursion
+    const typeName = err.constructor?.name || typeof err;
+    return `An error occurred (Type: ${typeName})`;
   } catch (e) {
-    return 'An un-serializable error occurred';
+    return 'An un-serializable system error occurred';
   }
+};
+
+/**
+ * DATA PURIFICATION
+ * Ensures Firestore data contains only serializable primitives.
+ */
+const sanitizeFirestoreData = (data: any): any => {
+  const sanitized: any = {};
+  for (const key in data) {
+    const val = data[key];
+    if (val === null || typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
+      sanitized[key] = val;
+    } else if (val instanceof Date) {
+      sanitized[key] = val.toISOString();
+    } else if (typeof val === 'object' && val.toDate && typeof val.toDate === 'function') {
+      // Handle Firestore Timestamps
+      sanitized[key] = val.toDate().toISOString();
+    } else {
+      // Convert complex objects (References, etc) to strings
+      sanitized[key] = String(val);
+    }
+  }
+  return sanitized;
 };
 
 export const useTransactions = () => {
@@ -46,9 +70,8 @@ export const useTransactions = () => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-  const addToast = useCallback((message: string, type: ToastMessage['type'] = 'info') => {
+  const addToast = useCallback((message: any, type: ToastMessage['type'] = 'info') => {
     const id = generateUUID();
-    // Ensure message is always a string primitive
     const safeMessage = typeof message === 'string' ? message : sanitizeError(message);
     setToasts(prev => [...prev, { id, message: safeMessage, type }]);
   }, []);
@@ -73,23 +96,27 @@ export const useTransactions = () => {
     const subscriptionsQuery = query(subscriptionsPath, orderBy('nextDueDate', 'asc'));
 
     const unsubscribeTransactions = onSnapshot(transactionsQuery, (snapshot) => {
-      const fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction));
+      const fetched = snapshot.docs.map(doc => ({ 
+        id: doc.id, 
+        ...sanitizeFirestoreData(doc.data()) 
+      } as Transaction));
       setTransactions(fetched);
       setIsDataLoaded(true);
     }, (error) => {
       const msg = sanitizeError(error);
-      console.error("Transactions Error: " + msg);
-      addToast(`Transactions: ${msg}`, 'error');
+      addToast(`Sync Failed: ${msg}`, 'error');
       setIsDataLoaded(true);
     });
 
     const unsubscribeSubscriptions = onSnapshot(subscriptionsQuery, (snapshot) => {
-      const fetched = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Subscription));
+      const fetched = snapshot.docs.map(doc => ({ 
+        id: doc.id, 
+        ...sanitizeFirestoreData(doc.data()) 
+      } as Subscription));
       setSubscriptions(fetched);
     }, (error) => {
       const msg = sanitizeError(error);
-      console.error("Subscriptions Error: " + msg);
-      addToast(`Subscriptions: ${msg}`, 'error');
+      addToast(`Subscriptions Sync Error: ${msg}`, 'error');
     });
 
     const unsubscribeSettings = onSnapshot(settingsDocRef, (docSnap) => {
@@ -98,8 +125,7 @@ export const useTransactions = () => {
       }
     }, (error) => {
       const msg = sanitizeError(error);
-      console.error("Settings Error: " + msg);
-      addToast(`Settings: ${msg}`, 'error');
+      addToast(`Settings Sync Error: ${msg}`, 'error');
     });
 
     return () => {
@@ -123,8 +149,7 @@ export const useTransactions = () => {
       await addDoc(collection(db, 'users', user.uid, 'transactions'), newTransaction);
       addToast('Transaction added!', 'success');
     } catch (error: any) {
-      console.error("Add Transaction Failed: " + sanitizeError(error));
-      addToast('Failed to add transaction', 'error');
+      addToast(`Add Failed: ${sanitizeError(error)}`, 'error');
     }
   };
 
@@ -134,8 +159,7 @@ export const useTransactions = () => {
       await deleteDoc(doc(db, 'users', user.uid, 'transactions', id));
       addToast('Transaction removed.', 'info');
     } catch(error: any) {
-      console.error("Delete Transaction Failed: " + sanitizeError(error));
-      addToast('Could not remove transaction', 'error');
+      addToast(`Delete Failed: ${sanitizeError(error)}`, 'error');
     }
   };
   
@@ -145,8 +169,7 @@ export const useTransactions = () => {
       await addDoc(collection(db, 'users', user.uid, 'subscriptions'), data);
       addToast('Subscription added!', 'success');
     } catch (error: any) {
-       console.error("Add Subscription Failed: " + sanitizeError(error));
-       addToast('Failed to add subscription', 'error');
+       addToast(`Add Subscription Failed: ${sanitizeError(error)}`, 'error');
     }
   };
   
@@ -156,7 +179,7 @@ export const useTransactions = () => {
       await deleteDoc(doc(db, 'users', user.uid, 'subscriptions', id));
       addToast('Subscription removed.', 'info');
     } catch(error: any) {
-      console.error("Delete Subscription Failed: " + sanitizeError(error));
+      addToast(`Delete Subscription Failed: ${sanitizeError(error)}`, 'error');
     }
   };
 
@@ -165,8 +188,7 @@ export const useTransactions = () => {
     try {
       await setDoc(doc(db, 'users', user.uid, 'settings', 'config'), { ...settings, ...newSettings });
     } catch (error: any) {
-      console.error("Update Settings Failed: " + sanitizeError(error));
-      addToast('Settings sync failed', 'error');
+      addToast(`Update Settings Failed: ${sanitizeError(error)}`, 'error');
     }
   };
 

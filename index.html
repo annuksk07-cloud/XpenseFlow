@@ -5,15 +5,18 @@
     <link rel="icon" type="image/png" href="https://img.sanishtech.com/u/4e2e11616c139405209c8eefc1543bd0.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- PWA Basic Meta -->
-    <meta name="theme-color" content="#3B82F6">
+    <!-- iOS / Safari PWA Support -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="XpenseFlow">
     <link rel="apple-touch-icon" href="https://img.sanishtech.com/u/4e2e11616c139405209c8eefc1543bd0.png">
     
-    <!-- PWA Manifest Data URI -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"XpenseFlow","short_name":"XpenseFlow","description":"Professional Expense Management","start_url":"/","display":"standalone","background_color":"#F0F2F5","theme_color":"#3B82F6","icons":[{"src":"https://img.sanishtech.com/u/4e2e11616c139405209c8eefc1543bd0.png","sizes":"192x192","type":"image/png"},{"src":"https://img.sanishtech.com/u/4e2e11616c139405209c8eefc1543bd0.png","sizes":"512x512","type":"image/png"}]}'>
+    <!-- PWA Basic Meta -->
+    <meta name="theme-color" content="#3B82F6">
+    
+    <!-- INLINE WEB APP MANIFEST (DATA URI BASE64) -->
+    <!-- Corrected Content: {"name":"XpenseFlow","short_name":"XpenseFlow","description":"Professional Expense Management","start_url":".","display":"standalone","background_color":"#F0F2F5","theme_color":"#3B82F6","icons":[{"src":"https://img.sanishtech.com/u/4e2e11616c139405209c8eefc1543bd0.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"https://img.sanishtech.com/u/4e2e11616c139405209c8eefc1543bd0.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]} -->
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiWHBlbnNlRmxvdyIsInNob3J0X25hbWUiOiJYcGVuc2VGbG93IiwiZGVzY3JpcHRpb24iOiJQcm9mZXNzaW9uYWwgRXhwZW5zZSBNYW5hZ2VtZW50Iiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNGMEYyRjUiLCJ0aGVtZV9jb2xvciI6IiMzQjgyRjYiLCJpY29ucyI6W3sic3JjIjoiaHR0cHM6Ly9pbWcuc2FuaXNodGVjaC5jb20vdS80ZTJlMTE2MTZjMTM5NDA1MjA5YzhlZWZjMTU0M2JkMC5wbmciLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIiwicHVycG9zZSI6ImFueSBtYXNrYWJsZSJ9LHsic3JjIjoiaHR0cHM6Ly9pbWcuc2FuaXNodGVjaC5jb20vdS80ZTJlMTE2MTZjMTM5NDA1MjA5YzhlZWZjMTU0M2JkMC5wbmciLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIiwicHVycG9zZSI6ImFueSBtYXNrYWJsZSJ9XX0=">
 
     <title>XpenseFlow - Professional Expense Management</title>
     
@@ -94,27 +97,29 @@
       }
     </style>
     
+    <!-- INLINE SERVICE WORKER SCRIPT -->
     <script type="module">
-      /** 
-       * SENIOR SERVICE WORKER STRATEGY
-       * Resolves "blob:" protocol errors by using conditional registration 
-       * and silencing errors in non-production/preview environments.
-       */
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
-          const isSecureContext = window.location.protocol === 'https:' || 
-                                  window.location.hostname === 'localhost' || 
-                                  window.location.hostname === '127.0.0.1';
+          const swCode = `
+            self.addEventListener('install', (event) => {
+              self.skipWaiting();
+            });
+            self.addEventListener('activate', (event) => {
+              event.waitUntil(clients.claim());
+            });
+            self.addEventListener('fetch', (event) => {
+              event.respondWith(fetch(event.request).catch(() => {}));
+            });
+          `;
           
-          if (isSecureContext) {
-            try {
-              const swCode = "self.addEventListener('fetch', (event) => { event.respondWith(fetch(event.request)); });";
-              const swDataUri = 'data:application/javascript;base64,' + btoa(swCode);
-              const registration = await navigator.serviceWorker.register(swDataUri);
-              console.log('PWA ServiceWorker registered successfully');
-            } catch (err) {
-              console.debug('ServiceWorker registration skipped (Sandbox/Cross-Origin restriction).', err);
-            }
+          try {
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+            const registration = await navigator.serviceWorker.register(swUrl);
+            console.log('XpenseFlow Service Worker Registered via Blob');
+          } catch (err) {
+            console.debug('Service Worker Registration skipped (Environment limitation)');
           }
         });
       }

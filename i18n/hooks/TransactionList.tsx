@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Transaction, Settings, TransactionType } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';

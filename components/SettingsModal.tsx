@@ -1,6 +1,6 @@
 import React from 'react';
 import { Settings, CURRENCIES, CurrencyCode } from '../types';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Language } from '../i18n/translations';
 
