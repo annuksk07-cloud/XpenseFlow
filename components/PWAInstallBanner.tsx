@@ -70,7 +70,7 @@ const PWAInstallBanner: React.FC = () => {
         <div className="flex items-center gap-4 mb-5">
           <div className="w-14 h-14 rounded-2xl logo-raised flex items-center justify-center shrink-0 border border-white/50 bg-white/20">
             <img 
-              src="https://img.sanishtech.com/u/4e2e11616c139405209c8eefc1543bd0.png" 
+              src="https://img.sanishtech.com/u/4e2e11616c139405209c8eefc154c9a5.png" 
               alt="XpenseFlow" 
               className="w-10 h-10 object-contain" 
             />

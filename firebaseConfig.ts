@@ -1,19 +1,16 @@
+
 /**
- * 🔥 FIREBASE SECURITY RULES 🔥
+ * 🛠️ FIREBASE AUTH CONFIGURATION GUIDE 🛠️
  * 
- * 1. Go to your Firebase Console (https://console.firebase.google.com/)
- * 2. Select your project: "kids-d0256"
- * 3. Go to "Firestore Database" -> "Rules" tab
- * 4. Paste the following code and click "Publish":
+ * IF YOU SEE 'auth/unauthorized-domain':
+ * 1. Open Firebase Console: https://console.firebase.google.com/project/kids-d0256/authentication/settings
+ * 2. Go to 'Authorized domains'.
+ * 3. Click 'Add domain'.
+ * 4. Add your current hosting domain (e.g., your-app.vercel.app).
  * 
- * rules_version = '2';
- * service cloud.firestore {
- *   match /databases/{database}/documents {
- *     match /users/{userId}/{document=**} {
- *       allow read, write: if request.auth != null && request.auth.uid == userId;
- *     }
- *   }
- * }
+ * ALSO ENSURE:
+ * - Google Sign-In is ENABLED in Authentication > Sign-in method.
+ * - Firestore Rules allow your user ID.
  */
 
 import { initializeApp } from 'firebase/app';
@@ -31,5 +28,7 @@ export const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+export default app;

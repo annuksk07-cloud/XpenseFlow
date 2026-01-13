@@ -52,7 +52,9 @@ export const translations = {
         savingsStreak: 'Savings Streak',
         days: 'Days',
         budgetUse: 'Budget Use',
-        spent: 'Spent'
+        spent: 'Spent',
+        savingsGoal: 'Savings Goal',
+        ofGoal: 'of goal reached'
     },
     // Analytics
     analytics: {
@@ -118,7 +120,7 @@ export const translations = {
     sync: { idle: 'Inactivo', syncing: 'Sincronizando...', synced: 'Sincronizado', error: 'Error de Sincronización' },
     nav: { home: 'Inicio', analytics: 'Análisis', history: 'Historial', settings: 'Ajustes' },
     dashboard: { totalBalance: 'Balance Total', income: 'Ingresos', expense: 'Gastos', subscriptions: 'Suscripciones', noSubscriptions: 'No hay suscripciones activas.' },
-    financialHealth: { title: 'Salud Financiera', savingsStreak: 'Racha de Ahorros', days: 'Días', budgetUse: 'Uso del Presupuesto', spent: 'Gastado' },
+    financialHealth: { title: 'Salud Financiera', savingsStreak: 'Racha de Ahorros', days: 'Días', budgetUse: 'Uso del Presupuesto', spent: 'Gastado', savingsGoal: 'Meta de Ahorro', ofGoal: 'de la meta alcanzada' },
     analytics: { spendAnalysis: 'Análisis de Gastos', categoryBreakdown: 'Desglose por Categoría', dailyExpense: 'Gasto Diario', noExpenseData: 'Sin datos de gastos para el gráfico.' },
     transactions: { title: 'Todas las Transacciones', noTransactions: 'Aún no hay transacciones.' },
     modals: {
@@ -152,7 +154,7 @@ export const translations = {
     sync: { idle: 'निष्क्रिय', syncing: 'सिंक हो रहा है...', synced: 'सिंक हो गया', error: 'सिंक त्रुटि' },
     nav: { home: 'होम', analytics: 'विश्लेषण', history: 'इतिहास', settings: 'सेटिंग्स' },
     dashboard: { totalBalance: 'कुल शेष', income: 'आय', expense: 'व्यय', subscriptions: 'सदस्यताएँ', noSubscriptions: 'कोई सक्रिय सदस्यता नहीं।' },
-    financialHealth: { title: 'वित्तीय स्वास्थ्य', savingsStreak: 'बचत की लकीर', days: 'दिन', budgetUse: 'बजट उपयोग', spent: 'खर्च' },
+    financialHealth: { title: 'वित्तीय स्वास्थ्य', savingsStreak: 'बचत की लकीर', days: 'दिन', budgetUse: 'बजट उपयोग', spent: 'खर्च', savingsGoal: 'बचत लक्ष्य', ofGoal: 'लक्ष्य हासिल किया गया' },
     analytics: { spendAnalysis: 'खर्च विश्लेषण', categoryBreakdown: 'श्रेणी विश्लेषण', dailyExpense: 'दैनिक व्यय', noExpenseData: 'चार्ट के लिए कोई व्यय डेटा नहीं।' },
     transactions: { title: 'सभी लेनदेन', noTransactions: 'अभी तक कोई लेनदेन नहीं।' },
     modals: {
@@ -184,9 +186,9 @@ export const translations = {
     header: { goPro: 'Devenir Pro' },
     fab: { addTransaction: 'Ajouter une transaction' },
     sync: { idle: 'Inactif', syncing: 'Synchronisation...', synced: 'Synchronisé', error: 'Erreur de Synchro' },
-    nav: { home: 'Accueil', analytics: 'Analyse', history: 'Historique', settings: 'Réglages' },
+    nav: { home: 'Accueil', analytics: 'Analyse', historique: 'Historique', settings: 'Réglages' },
     dashboard: { totalBalance: 'Solde Total', income: 'Revenus', expense: 'Dépenses', subscriptions: 'Abonnements', noSubscriptions: 'Aucun abonnement actif.' },
-    financialHealth: { title: 'Santé Financière', savingsStreak: 'Série d\'Épargne', days: 'Jours', budgetUse: 'Utilisation du Budget', spent: 'Dépensé' },
+    financialHealth: { title: 'Santé Financière', savingsStreak: 'Série d\'Épargne', days: 'Jours', budgetUse: 'Utilisation du Budget', spent: 'Dépensé', savingsGoal: 'Objectif d\'Épargne', ofGoal: 'de l\'objectif atteint' },
     analytics: { spendAnalysis: 'Analyse des Dépenses', categoryBreakdown: 'Répartition par Catégorie', dailyExpense: 'Dépense Quotidienne', noExpenseData: 'Aucune donnée de dépense pour le graphique.' },
     transactions: { title: 'Toutes les Transactions', noTransactions: 'Aucune transaction pour le moment.' },
     modals: {

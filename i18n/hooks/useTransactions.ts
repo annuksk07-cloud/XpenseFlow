@@ -9,37 +9,43 @@ declare const window: any;
 const generateUUID = () => crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => (Math.random() * 16 | 0).toString(16));
 
 /**
- * CRASH-PROOF ERROR SANITIZER
- * Only extracts primitive string messages to prevent "Circular structure to JSON" crashes.
+ * CIRCULAR-SAFE ERROR SANITIZER
+ * Explicitly converts complex error objects into primitive strings to prevent JSON circularity crashes.
  */
 const sanitizeError = (err: any): string => {
-  if (!err) return 'Unknown error';
+  if (err === null || err === undefined) return 'Unknown error';
   if (typeof err === 'string') return err;
   
-  try {
-    const message = err.message || err.code || 'System Error';
-    return typeof message === 'string' ? message : 'System Error';
-  } catch (e) {
-    return 'Un-serializable Error';
-  }
+  // Try to find a primitive message property
+  const possibleMessage = err.message || err.code || err.reason;
+  if (typeof possibleMessage === 'string') return possibleMessage;
+  
+  // Use String constructor for a shallow, non-recursive string conversion
+  return String(err);
 };
 
 /**
- * DATA PURIFICATION
- * Ensures Firestore data is converted to plain, serializable objects.
+ * DEEP DATA PURIFICATION
+ * Ensures Firestore data is mapped to plain objects, converting special types like Timestamps to ISO strings.
  */
 const sanitizeFirestoreData = (data: any): any => {
+  if (!data || typeof data !== 'object') return data;
+  
   const sanitized: any = {};
   for (const key in data) {
-    const val = data[key];
-    if (val === null || typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
-      sanitized[key] = val;
-    } else if (val instanceof Date) {
-      sanitized[key] = val.toISOString();
-    } else if (typeof val === 'object' && val.toDate && typeof val.toDate === 'function') {
-      sanitized[key] = val.toDate().toISOString();
-    } else {
-      sanitized[key] = String(val);
+    if (Object.prototype.hasOwnProperty.call(data, key)) {
+      const val = data[key];
+      
+      if (val === null || typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
+        sanitized[key] = val;
+      } else if (val instanceof Date) {
+        sanitized[key] = val.toISOString();
+      } else if (typeof val === 'object' && val.toDate && typeof val.toDate === 'function') {
+        sanitized[key] = val.toDate().toISOString();
+      } else {
+        // Final fallback: stringify individual property if complex to avoid circle crawl
+        sanitized[key] = String(val);
+      }
     }
   }
   return sanitized;
@@ -60,7 +66,7 @@ export const useTransactions = () => {
 
   const addToast = useCallback((message: any, type: ToastMessage['type'] = 'info') => {
     const id = generateUUID();
-    const safeMessage = typeof message === 'string' ? message : sanitizeError(message);
+    const safeMessage = sanitizeError(message);
     setToasts(prev => [...prev, { id, message: safeMessage, type }]);
   }, []);
   
@@ -91,7 +97,7 @@ export const useTransactions = () => {
       setTransactions(fetched);
       setIsDataLoaded(true);
     }, (error) => {
-      addToast(`Sync Failed: ${sanitizeError(error)}`, 'error');
+      addToast(`Sync Error: ${sanitizeError(error)}`, 'error');
       setIsDataLoaded(true);
     });
 
@@ -102,7 +108,7 @@ export const useTransactions = () => {
       } as Subscription));
       setSubscriptions(fetched);
     }, (error) => {
-      addToast(`Subscriptions Sync Error: ${sanitizeError(error)}`, 'error');
+      addToast(`Subscription Error: ${sanitizeError(error)}`, 'error');
     });
 
     const unsubscribeSettings = onSnapshot(settingsDocRef, (docSnap) => {
@@ -110,7 +116,7 @@ export const useTransactions = () => {
         setSettings(docSnap.data() as Settings);
       }
     }, (error) => {
-      addToast(`Settings Sync Error: ${sanitizeError(error)}`, 'error');
+      addToast(`Settings Error: ${sanitizeError(error)}`, 'error');
     });
 
     return () => {
@@ -132,9 +138,9 @@ export const useTransactions = () => {
     const newTransaction = { ...data, amount: baseAmount, date: new Date().toISOString() };
     try {
       await addDoc(collection(db, 'users', user.uid, 'transactions'), newTransaction);
-      addToast('Transaction added!', 'success');
+      addToast('Transaction recorded!', 'success');
     } catch (error: any) {
-      addToast(`Add Failed: ${sanitizeError(error)}`, 'error');
+      addToast(`Record error: ${sanitizeError(error)}`, 'error');
     }
   };
 
@@ -144,7 +150,7 @@ export const useTransactions = () => {
       await deleteDoc(doc(db, 'users', user.uid, 'transactions', id));
       addToast('Transaction removed.', 'info');
     } catch(error: any) {
-      addToast(`Delete Failed: ${sanitizeError(error)}`, 'error');
+      addToast(`Delete failed: ${sanitizeError(error)}`, 'error');
     }
   };
   
@@ -154,7 +160,7 @@ export const useTransactions = () => {
       await addDoc(collection(db, 'users', user.uid, 'subscriptions'), data);
       addToast('Subscription added!', 'success');
     } catch (error: any) {
-       addToast(`Add Subscription Failed: ${sanitizeError(error)}`, 'error');
+       addToast(`Add error: ${sanitizeError(error)}`, 'error');
     }
   };
   
@@ -164,7 +170,7 @@ export const useTransactions = () => {
       await deleteDoc(doc(db, 'users', user.uid, 'subscriptions', id));
       addToast('Subscription removed.', 'info');
     } catch(error: any) {
-      addToast(`Delete Subscription Failed: ${sanitizeError(error)}`, 'error');
+      addToast(`Delete error: ${sanitizeError(error)}`, 'error');
     }
   };
 
@@ -173,7 +179,7 @@ export const useTransactions = () => {
     try {
       await setDoc(doc(db, 'users', user.uid, 'settings', 'config'), { ...settings, ...newSettings });
     } catch (error: any) {
-      addToast(`Update Settings Failed: ${sanitizeError(error)}`, 'error');
+      addToast(`Settings error: ${sanitizeError(error)}`, 'error');
     }
   };
 
@@ -198,11 +204,11 @@ export const useTransactions = () => {
       const blob = new Blob([headers + rows], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `XpenseFlow_Export.csv`;
+      link.download = `XpenseFlow_Data.csv`;
       link.click();
-      addToast('CSV exported.', 'success');
+      addToast('CSV Exported', 'success');
     } catch (e) {
-      addToast('CSV export failed', 'error');
+      addToast('CSV Export Failed', 'error');
     }
   };
 
@@ -212,10 +218,7 @@ export const useTransactions = () => {
       const { jsPDF } = window.jspdf;
       const docPdf = new jsPDF();
       docPdf.setFontSize(18);
-      docPdf.text("XpenseFlow Transaction Report", 14, 22);
-      docPdf.setFontSize(11);
-      docPdf.setTextColor(100);
-      docPdf.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
+      docPdf.text("XpenseFlow Financial Report", 14, 22);
       
       const tableRows = transactions.map(t => [
         new Date(t.date).toLocaleDateString(),
@@ -228,15 +231,15 @@ export const useTransactions = () => {
       docPdf.autoTable({
         head: [["Date", "Title", "Category", "Type", "Amount"]],
         body: tableRows,
-        startY: 40,
+        startY: 30,
         theme: 'grid',
         headStyles: { fillColor: [59, 130, 246] }
       });
       
       docPdf.save(`XpenseFlow_Report.pdf`);
-      addToast('PDF exported.', 'success');
+      addToast('PDF Exported', 'success');
     } catch (e) {
-      addToast('PDF export failed', 'error');
+      addToast('PDF Export Failed', 'error');
     }
   };
 

@@ -1,43 +1,90 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { onAuthStateChanged, User, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+import { 
+  onAuthStateChanged, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut,
+  setPersistence,
+  browserLocalPersistence
+} from 'firebase/auth';
 import { auth } from './firebaseConfig';
 
+// Define a safe User type that doesn't contain circular Firebase internals
+export interface AppUser {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+}
+
 interface AuthContextType {
-  user: User | null;
+  user: AppUser | null;
   loading: boolean;
-  loginWithGoogle: () => Promise<any>;
-  loginWithEmail: (email: string, pass: string) => Promise<any>;
-  registerWithEmail: (email: string, pass: string) => Promise<any>;
-  logout: () => Promise<any>;
+  loginWithGoogle: () => Promise<void>;
+  loginWithEmail: (email: string, pass: string) => Promise<void>;
+  registerWithEmail: (email: string, pass: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // onAuthStateChanged uses the imported, shared auth instance
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    // Set persistence to local storage
+    setPersistence(auth, browserLocalPersistence).catch(err => console.error("Persistence error:", err));
+
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        // Create a plain object containing only necessary data
+        const sanitizedUser: AppUser = {
+          uid: String(firebaseUser.uid),
+          email: firebaseUser.email ? String(firebaseUser.email) : null,
+          displayName: firebaseUser.displayName ? String(firebaseUser.displayName) : null,
+          photoURL: firebaseUser.photoURL ? String(firebaseUser.photoURL) : null,
+        };
+        
+        try {
+          localStorage.setItem('xpenseflow_user_data', JSON.stringify(sanitizedUser));
+        } catch (e) {
+          console.error("Storage error:", e);
+        }
+        setUser(sanitizedUser);
+      } else {
+        localStorage.removeItem('xpenseflow_user_data');
+        setUser(null);
+      }
       setLoading(false);
     });
     return () => unsubscribe();
   }, []);
 
-  const loginWithGoogle = () => {
-    const googleProvider = new GoogleAuthProvider();
-    return signInWithPopup(auth, googleProvider);
+  const loginWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    await signInWithPopup(auth, provider);
   };
-  const loginWithEmail = (email: string, pass: string) => signInWithEmailAndPassword(auth, email, pass);
-  const registerWithEmail = (email: string, pass: string) => createUserWithEmailAndPassword(auth, email, pass);
-  const logout = () => signOut(auth);
 
-  const value = { user, loading, loginWithGoogle, loginWithEmail, registerWithEmail, logout };
+  const loginWithEmail = async (email: string, pass: string) => {
+    await signInWithEmailAndPassword(auth, email, pass);
+  };
+
+  const registerWithEmail = async (email: string, pass: string) => {
+    await createUserWithEmailAndPassword(auth, email, pass);
+  };
+
+  const logout = async () => {
+    await signOut(auth);
+    localStorage.removeItem('xpenseflow_user_data');
+    setUser(null);
+  };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ user, loading, loginWithGoogle, loginWithEmail, registerWithEmail, logout }}>
       {children}
     </AuthContext.Provider>
   );
