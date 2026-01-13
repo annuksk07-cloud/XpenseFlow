@@ -102,30 +102,22 @@
        */
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
-          // Check for secure context (production HTTPS or local development)
           const isSecureContext = window.location.protocol === 'https:' || 
                                   window.location.hostname === 'localhost' || 
                                   window.location.hostname === '127.0.0.1';
           
           if (isSecureContext) {
             try {
-              // Minimal SW code to satisfy PWA criteria
               const swCode = "self.addEventListener('fetch', (event) => { event.respondWith(fetch(event.request)); });";
               const swDataUri = 'data:application/javascript;base64,' + btoa(swCode);
-              
-              // We try to register. If the browser blocks Data URIs for SW (common in Chrome), 
-              // it fails silently via the catch block to avoid console noise in previews.
               const registration = await navigator.serviceWorker.register(swDataUri);
               console.log('PWA ServiceWorker registered successfully');
             } catch (err) {
-              // Silent fail for development/sandbox environments where Data URIs are restricted
               console.debug('ServiceWorker registration skipped (Sandbox/Cross-Origin restriction).', err);
             }
           }
         });
       }
-
-      /** VITE OPTIMIZATION: chunkSizeWarningLimit: 1000 **/
     </script>
 
     <script type="importmap">
