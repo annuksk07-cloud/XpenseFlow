@@ -60,7 +60,7 @@ const PWAInstallBanner: React.FC = () => {
       <div className="max-w-md mx-auto pointer-events-auto neumorphic p-5 border border-white/50 bg-[#F0F2F5]/95 backdrop-blur-md">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 rounded-2xl logo-raised flex items-center justify-center shrink-0">
-             <img src="https://img.icons8.com/color/96/xd.png" alt="App Logo" className="w-8 h-8" />
+             <img src="https://img.sanishtech.com/u/4e2e11616c139405209c8eefc1543bd0.png" alt="App Logo" className="w-8 h-8" />
           </div>
           <div className="flex-1">
             <h4 className="text-sm font-black text-[#1A1C2E] mb-1">Install XpenseFlow</h4>

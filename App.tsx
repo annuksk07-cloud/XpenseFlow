@@ -63,7 +63,7 @@ const AppContent: React.FC = () => {
           {/* Branded Official Logo - Replacing Profile Pic */}
           <div className="w-11 h-11 rounded-full logo-raised flex items-center justify-center border-2 border-white overflow-hidden active:scale-95 transition-all">
             <img 
-              src="https://img.icons8.com/color/96/xd.png" 
+              src="https://img.sanishtech.com/u/4e2e11616c139405209c8eefc1543bd0.png" 
               alt="XpenseFlow Branded Logo" 
               className="w-full h-full object-cover" 
             />
