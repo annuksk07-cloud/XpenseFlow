@@ -26,6 +26,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
   
   if (!isOpen) return null;
 
+  const currentCurrencySymbol = CURRENCIES[settings.baseCurrency].symbol;
+
   return (
     <div className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm px-4" onClick={onClose}>
       <div className="w-full max-w-md bg-[#F0F2F5] rounded-t-[40px] sm:rounded-[40px] p-8 shadow-2xl animate-in slide-in-from-bottom duration-300 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
@@ -54,6 +56,37 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
                   {code}
                 </button>
               ))}
+            </div>
+          </section>
+
+          <section>
+            <label className="font-bold text-xs uppercase tracking-widest text-gray-400 mb-4 block">{t('modals.financialTargets')}</label>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tight ml-1">{t('modals.budgetLimitLabel')}</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl neumorphic-flat flex items-center justify-center font-black text-blue-600">{currentCurrencySymbol}</div>
+                  <input 
+                    type="number" 
+                    value={settings.budgetLimit} 
+                    onChange={(e) => updateSettings({ budgetLimit: Number(e.target.value) })}
+                    className="flex-1 px-5 py-3 neumorphic-inset outline-none text-[#1A1C2E] font-bold rounded-2xl" 
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tight ml-1">{t('modals.savingsGoalLabel')}</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl neumorphic-flat flex items-center justify-center font-black text-emerald-600">{currentCurrencySymbol}</div>
+                  <input 
+                    type="number" 
+                    value={settings.savingsGoal} 
+                    onChange={(e) => updateSettings({ savingsGoal: Number(e.target.value) })}
+                    className="flex-1 px-5 py-3 neumorphic-inset outline-none text-[#1A1C2E] font-bold rounded-2xl" 
+                  />
+                </div>
+              </div>
             </div>
           </section>
 

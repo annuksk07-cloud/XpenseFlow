@@ -92,7 +92,10 @@ export const translations = {
         exportCSV: 'Export to CSV',
         exportPDF: 'Export to PDF',
         signOut: 'Sign Out',
-        language: 'Language'
+        language: 'Language',
+        financialTargets: 'Financial Targets',
+        budgetLimitLabel: 'Monthly Budget Limit',
+        savingsGoalLabel: 'Target Savings Goal'
     },
     // Categories
     categories: {
@@ -128,7 +131,8 @@ export const translations = {
       titlePlaceholder: 'Título', amountPlaceholder: 'Monto', category: 'Categoría', saveTransaction: 'Guardar Transacción',
       subscriptionNamePlaceholder: 'Nombre de la Suscripción (ej. Netflix)', billingCycle: 'Ciclo de Facturación', monthly: 'Mensual', yearly: 'Anual',
       startDate: 'Fecha de Inicio', saveSubscription: 'Guardar Suscripción', baseCurrency: 'Moneda Base', stealthMode: 'Modo Incógnito',
-      stealthModeDesc: 'Ocultar números sensibles', dataBackup: 'Datos y Copia de Seguridad', exportCSV: 'Exportar a CSV', exportPDF: 'Exportar a PDF', signOut: 'Cerrar Sesión', language: 'Idioma'
+      stealthModeDesc: 'Ocultar números sensibles', dataBackup: 'Datos y Copia de Seguridad', exportCSV: 'Exportar a CSV', exportPDF: 'Exportar a PDF', signOut: 'Cerrar Sesión', language: 'Idioma',
+      financialTargets: 'Objetivos Financieros', budgetLimitLabel: 'Límite de Presupuesto Mensual', savingsGoalLabel: 'Meta de Ahorro'
     },
     categories: {
         Food: 'Comida', Transport: 'Transporte', Shopping: 'Compras', Bills: 'Cuentas', Entertainment: 'Entretenimiento', Health: 'Salud',
@@ -162,7 +166,8 @@ export const translations = {
       titlePlaceholder: 'शीर्षक', amountPlaceholder: 'राशि', category: 'श्रेणी', saveTransaction: 'लेनदेन सहेजें',
       subscriptionNamePlaceholder: 'सदस्यता का नाम (जैसे नेटफ्लिक्स)', billingCycle: 'बिलिंग चक्र', monthly: 'मासिक', yearly: 'वार्षिक',
       startDate: 'आरंभ तिथि', saveSubscription: 'सदस्यता सहेजें', baseCurrency: 'आधार मुद्रा', stealthMode: 'स्टील्थ मोड',
-      stealthModeDesc: 'संवेदनशील नंबरों को धुंधला करें', dataBackup: 'डेटा और बैकअप', exportCSV: 'सीएसवी में निर्यात करें', exportPDF: 'पीडीएफ में निर्यात करें', signOut: 'साइन आउट', language: 'भाषा'
+      stealthModeDesc: 'संवेदनशील नंबरों को धुंधला करें', dataBackup: 'डेटा और बैकअप', exportCSV: 'सीएसवी में निर्यात करें', exportPDF: 'पीडीएफ में निर्यात करें', signOut: 'साइन आउट', language: 'भाषा',
+      financialTargets: 'वित्तीय लक्ष्य', budgetLimitLabel: 'मासिक बजट सीमा', savingsGoalLabel: 'बचत लक्ष्य'
     },
      categories: {
         Food: 'भोजन', Transport: 'परिवहन', Shopping: 'खरीदारी', Bills: 'बिल', Entertainment: 'मनोरंजन', Health: 'स्वास्थ्य',
@@ -196,7 +201,8 @@ export const translations = {
       titlePlaceholder: 'Titre', amountPlaceholder: 'Montant', category: 'Catégorie', saveTransaction: 'Enregistrer la Transaction',
       subscriptionNamePlaceholder: "Nom de l'abonnement (ex. Netflix)", billingCycle: 'Cycle de Facturation', monthly: 'Mensuel', yearly: 'Annuel',
       startDate: 'Date de Début', saveSubscription: "Enregistrer l'Abonnement", baseCurrency: 'Devise de Base', stealthMode: 'Mode Discret',
-      stealthModeDesc: 'Flouter les chiffres sensibles', dataBackup: 'Données et Sauvegarde', exportCSV: 'Exporter en CSV', exportPDF: 'Exporter en PDF', signOut: 'Se Déconnecter', language: 'Langue'
+      stealthModeDesc: 'Flouter les chiffres sensibles', dataBackup: 'Données et Sauvegarde', exportCSV: 'Exporter en CSV', exportPDF: 'Exporter en PDF', signOut: 'Se Déconnecter', language: 'Langue',
+      financialTargets: 'Objectifs Financiers', budgetLimitLabel: 'Limite de Budget Mensuel', savingsGoalLabel: 'Objectif d\'Épargne'
     },
     categories: {
         Food: 'Nourriture', Transport: 'Transport', Shopping: 'Achats', Bills: 'Factures', Entertainment: 'Divertissement', Health: 'Santé',
