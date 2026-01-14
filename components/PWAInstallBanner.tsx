@@ -5,13 +5,15 @@ const PWAInstallBanner: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [platform, setPlatform] = useState<'android' | 'ios' | 'other'>('other');
 
+  const LOGO_URL = "https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144";
+
   useEffect(() => {
     // 1. Check standalone mode
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
     if (isStandalone) return;
 
     // 2. Check 24-hour persistence
-    const hideUntil = localStorage.getItem('xpenseflow_pwa_v2_hide');
+    const hideUntil = localStorage.getItem('xpenseflow_pwa_hide_v3');
     if (hideUntil && parseInt(hideUntil) > Date.now()) return;
 
     // 3. Platform Detection
@@ -19,26 +21,26 @@ const PWAInstallBanner: React.FC = () => {
     const isIOS = /iphone|ipad|ipod/.test(userAgent);
     setPlatform(isIOS ? 'ios' : 'android');
 
-    // 4. Wait 5 seconds after load to show
-    const showTimer = setTimeout(() => {
-      if (isIOS) {
-        setIsVisible(true);
-      }
-    }, 5000);
-
-    // 5. Handle BeforeInstallPrompt
+    // 4. Handle BeforeInstallPrompt for Android/Chrome
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      // Wait 5 seconds after prompt is available
+      // Wait 5 seconds after prompt is available to show
       setTimeout(() => setIsVisible(true), 5000);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
+    // 5. iOS fallback trigger (show after 5s because iOS doesn't have beforeinstallprompt)
+    const iosTimer = setTimeout(() => {
+      if (isIOS) {
+        setIsVisible(true);
+      }
+    }, 5000);
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      clearTimeout(showTimer);
+      clearTimeout(iosTimer);
     };
   }, []);
 
@@ -51,6 +53,7 @@ const PWAInstallBanner: React.FC = () => {
       }
       setDeferredPrompt(null);
     } else if (platform === 'ios') {
+      // Just hide and let them follow instruction
       setIsVisible(false);
     }
   };
@@ -59,18 +62,18 @@ const PWAInstallBanner: React.FC = () => {
     setIsVisible(false);
     // Suppress for 24 hours
     const nextShow = Date.now() + 24 * 60 * 60 * 1000;
-    localStorage.setItem('xpenseflow_pwa_v2_hide', nextShow.toString());
+    localStorage.setItem('xpenseflow_pwa_hide_v3', nextShow.toString());
   };
 
   if (!isVisible) return null;
 
   return (
-    <div className="fixed top-14 left-0 right-0 z-[100] px-6 pointer-events-none animate-in fade-in slide-in-from-top duration-700">
+    <div className="fixed top-20 left-0 right-0 z-[100] px-6 pointer-events-none animate-in fade-in slide-in-from-top duration-700">
       <div className="max-w-md mx-auto pointer-events-auto neumorphic p-6 border-2 border-white/80 bg-[#F0F2F5]/95 backdrop-blur-xl ring-1 ring-blue-500/10">
         <div className="flex items-center gap-4 mb-5">
           <div className="w-14 h-14 rounded-2xl logo-raised flex items-center justify-center shrink-0 border border-white/50 bg-white/20 overflow-hidden">
             <img 
-              src="https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144" 
+              src={LOGO_URL} 
               alt="XpenseFlow" 
               className="w-10 h-10 object-contain" 
             />
@@ -79,7 +82,7 @@ const PWAInstallBanner: React.FC = () => {
             <h4 className="text-sm font-black text-[#1A1C2E] leading-tight">Install XpenseFlow</h4>
             <p className="text-[11px] font-bold text-gray-500 mt-1.5 leading-relaxed">
               {platform === 'ios' 
-                ? "Tap Share ➕ then 'Add to Home Screen' for the full experience." 
+                ? "Tap Share ➕ then 'Add to Home Screen' for the full app experience." 
                 : "Add to home screen for instant access and native-like performance."}
             </p>
           </div>

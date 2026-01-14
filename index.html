@@ -15,8 +15,8 @@
     <meta name="apple-mobile-web-app-title" content="XpenseFlow" />
     <meta name="theme-color" content="#3B82F6" />
     
-    <!-- Lightweight Manifest (Data URI) -->
-    <link rel="manifest" href='data:application/json,{"name":"XpenseFlow","short_name":"XpenseFlow","start_url":".","display":"standalone","background_color":"#F0F2F5","theme_color":"#3B82F6","icons":[{"src":"https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144","sizes":"512x512","type":"image/png"}]}' />
+    <!-- Repaired Manifest with correct Icons and Purpose -->
+    <link rel="manifest" href='data:application/json,{"name":"XpenseFlow","short_name":"XpenseFlow","start_url":".","display":"standalone","background_color":"#F0F2F5","theme_color":"#3B82F6","icons":[{"src":"https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}' />
 
     <!-- External Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -111,6 +111,21 @@
   }
 }
 </script>
+    <!-- Repaired Service Worker Registration via Blob -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          const swCode = `
+            self.addEventListener('install', (e) => self.skipWaiting());
+            self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
+            self.addEventListener('fetch', (e) => {});
+          `;
+          const blob = new Blob([swCode], { type: 'application/javascript' });
+          const url = URL.createObjectURL(blob);
+          navigator.serviceWorker.register(url).catch(console.error);
+        });
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
