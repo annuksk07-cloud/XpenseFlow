@@ -14,9 +14,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="XpenseFlow" />
     <meta name="theme-color" content="#3B82F6" />
+    <meta name="mobile-web-app-capable" content="yes" />
     
-    <!-- Repaired Manifest with correct Icons and Purpose -->
-    <link rel="manifest" href='data:application/json,{"name":"XpenseFlow","short_name":"XpenseFlow","start_url":".","display":"standalone","background_color":"#F0F2F5","theme_color":"#3B82F6","icons":[{"src":"https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}' />
+    <!-- PWA Manifest - Mandatory for 'Install' option -->
+    <link rel="manifest" href='data:application/json,{"name":"XpenseFlow Tracker","short_name":"XpenseFlow","start_url":"./","display":"standalone","background_color":"#F0F2F5","theme_color":"#3B82F6","icons":[{"src":"https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144","sizes":"192x192","type":"image/png","purpose":"any"},{"src":"https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144","sizes":"512x512","type":"image/png","purpose":"any"}]}' />
 
     <!-- External Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -40,7 +41,8 @@
         width: 100%;
         margin: 0;
         padding: 0;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: hidden;
         position: fixed;
         -webkit-tap-highlight-color: transparent;
         background-color: var(--app-bg);
@@ -57,8 +59,9 @@
         flex: 1;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
-        padding-bottom: 200px;
+        padding-bottom: 120px;
       }
+      /* Neumorphic UI Shadows */
       .neumorphic {
         background: #F0F2F5;
         border-radius: 28px;
@@ -73,7 +76,7 @@
         box-shadow: 6px 6px 14px #d1d9e6, -6px -6px 14px #ffffff;
       }
       .neumorphic-pressed {
-        box-shadow: inset 6px 6px 12px #b8b9be, inset -6px -6px 12px #ffffff;
+        box-shadow: inset 4px 4px 8px #b8b9be, inset -4px -4px 8px #ffffff;
       }
       .logo-raised {
         background: #F0F2F5;
@@ -111,18 +114,19 @@
   }
 }
 </script>
-    <!-- Repaired Service Worker Registration via Blob -->
+    <!-- Robust Service Worker Registration with Relative Pathing -->
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          const swCode = `
-            self.addEventListener('install', (e) => self.skipWaiting());
-            self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
-            self.addEventListener('fetch', (e) => {});
-          `;
-          const blob = new Blob([swCode], { type: 'application/javascript' });
-          const url = URL.createObjectURL(blob);
-          navigator.serviceWorker.register(url).catch(console.error);
+          // Use a strictly relative path to current origin to avoid domain mismatch errors
+          // Wrap in a promise-based catch to prevent red errors in preview mode
+          navigator.serviceWorker.register('./sw.js')
+            .then(reg => {
+              console.log('PWA ServiceWorker registered successfully at same-origin scope');
+            })
+            .catch(err => {
+              console.warn('PWA: Service Worker registration suppressed by environment/origin limits.', err.message);
+            });
         });
       }
     </script>
