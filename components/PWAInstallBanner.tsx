@@ -19,7 +19,7 @@ const PWAInstallBanner: React.FC = () => {
     const isIOS = /iphone|ipad|ipod/.test(userAgent);
     setPlatform(isIOS ? 'ios' : 'android');
 
-    // 4. Wait 5 seconds after load to show (Lockdown Requirement)
+    // 4. Wait 5 seconds after load to show
     const showTimer = setTimeout(() => {
       if (isIOS) {
         setIsVisible(true);
@@ -68,9 +68,9 @@ const PWAInstallBanner: React.FC = () => {
     <div className="fixed top-14 left-0 right-0 z-[100] px-6 pointer-events-none animate-in fade-in slide-in-from-top duration-700">
       <div className="max-w-md mx-auto pointer-events-auto neumorphic p-6 border-2 border-white/80 bg-[#F0F2F5]/95 backdrop-blur-xl ring-1 ring-blue-500/10">
         <div className="flex items-center gap-4 mb-5">
-          <div className="w-14 h-14 rounded-2xl logo-raised flex items-center justify-center shrink-0 border border-white/50 bg-white/20">
+          <div className="w-14 h-14 rounded-2xl logo-raised flex items-center justify-center shrink-0 border border-white/50 bg-white/20 overflow-hidden">
             <img 
-              src="https://img.sanishtech.com/u/4e2e11616c139405209c8eefc154c9a5.png" 
+              src="https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144" 
               alt="XpenseFlow" 
               className="w-10 h-10 object-contain" 
             />

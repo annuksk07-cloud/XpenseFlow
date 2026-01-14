@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -27,8 +26,12 @@ const LoginScreen: React.FC = () => {
     <div className="min-h-screen bg-[#F0F2F5] flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in duration-500">
         <div className="text-center space-y-2">
-          <div className="w-20 h-20 bg-white rounded-3xl logo-raised flex items-center justify-center mx-auto mb-6">
-            <img src="https://img.sanishtech.com/u/4e2e11616c139405209c8eefc154c9a5.png" alt="Logo" className="w-12 h-12" />
+          <div className="w-20 h-20 bg-white rounded-3xl logo-raised flex items-center justify-center mx-auto mb-6 overflow-hidden">
+            <img 
+              src="https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144" 
+              alt="Logo" 
+              className="w-14 h-14 object-contain" 
+            />
           </div>
           <h1 className="text-4xl font-black text-[#1A1C2E] tracking-tight">
             Xpense<span className="text-blue-600">Flow</span>
@@ -87,5 +90,4 @@ const LoginScreen: React.FC = () => {
   );
 };
 
-// Fix: Added missing default export for LoginScreen component.
 export default LoginScreen;
