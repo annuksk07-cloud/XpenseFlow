@@ -1,4 +1,3 @@
-
 /**
  * 🛠️ FIREBASE AUTH CONFIGURATION GUIDE 🛠️
  * 
@@ -13,7 +12,7 @@
  * - Firestore Rules allow your user ID.
  */
 
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
@@ -27,7 +26,8 @@ export const firebaseConfig = {
   appId: "1:975392531560:web:7b165f696b1bdc8f57f47dd"
 };
 
-const app = initializeApp(firebaseConfig);
+// Singleton pattern to prevent duplicate initialization
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 export const db = getFirestore(app);
 export const auth = getAuth(app);
