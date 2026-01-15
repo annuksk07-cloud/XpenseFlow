@@ -1,33 +1,38 @@
 /**
- * XpenseFlow Service Worker v8
- * Professional structure for 100% PWA install rate on HTTPS.
+ * XpenseFlow Service Worker v9
+ * Required for PWA Installability
  */
 
-const CACHE_NAME = 'xpenseflow-static-v8';
+const CACHE_NAME = 'xpenseflow-v9';
+const ASSETS_TO_CACHE = [
+  '/',
+  '/index.html',
+  '/manifest.json'
+];
 
-// Install event: trigger skipWaiting to ensure the new SW activates immediately
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      // We can pre-cache essential local assets if needed
-      return cache.addAll(['./', './index.html']);
+      return cache.addAll(ASSETS_TO_CACHE);
     }).then(() => self.skipWaiting())
   );
 });
 
-// Activate event: claim all clients
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+      );
+    }).then(() => self.clients.claim())
+  );
 });
 
-// Fetch event: mandatory for PWA "Install" button to appear in Chrome
+// Fetch listener is MANDATORY for PWA installation
 self.addEventListener('fetch', (event) => {
-  // Pass-through handler
-  // For a financial app, we generally want fresh data, but a fetch listener is a PWA requirement.
   event.respondWith(
     fetch(event.request).catch(() => {
-      // Fallback for offline mode if resources are cached
-      return caches.match(event.request);
+      return caches.match(event.request) || caches.match('/');
     })
   );
 });
