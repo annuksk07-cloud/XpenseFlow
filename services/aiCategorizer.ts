@@ -47,5 +47,5 @@ export const classifyExpense = (title: string): string => {
       }
     }
   }
-  return 'General'; // Default category
+  return 'Other'; // Default category
 };

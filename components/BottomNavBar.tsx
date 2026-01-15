@@ -11,9 +11,9 @@ interface BottomNavBarProps {
 const NavItem: React.FC<{ icon: string; label: string; isActive: boolean; onClick: () => void }> = ({ icon, label, isActive, onClick }) => (
   <button onClick={onClick} className="flex flex-col items-center justify-center w-full h-full transition-all active:scale-90 focus:outline-none relative z-10">
     <div className={`w-11 h-10 flex items-center justify-center rounded-2xl transition-all duration-300 ${isActive ? 'neumorphic-pressed bg-white/40' : ''}`}>
-        <i className={`fa-solid ${icon} text-lg transition-colors duration-300 ${isActive ? 'text-blue-600' : 'text-[#1A1C2E] opacity-70'}`}></i>
+        <i className={`fa-solid ${icon} text-lg transition-colors duration-300 ${isActive ? 'text-[#1E40AF]' : 'text-[#1A1C2E] opacity-70'}`}></i>
     </div>
-    <span className={`text-[10px] mt-1 font-bold transition-colors uppercase tracking-tight ${isActive ? 'text-blue-600' : 'text-gray-400'}`}>{label}</span>
+    <span className={`text-[10px] mt-1 font-bold transition-colors uppercase tracking-tight ${isActive ? 'text-[#1E40AF]' : 'text-gray-400'}`}>{label}</span>
   </button>
 );
 
@@ -28,11 +28,11 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, setActiveTab, on
         <div className="absolute left-1/2 -translate-x-1/2 -top-10 z-50">
           <button
             onClick={onAddClick}
-            className="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-[0_15px_40px_rgba(59,130,246,0.6)] border-6 border-[#F0F2F5] active:scale-90 transition-all group overflow-hidden"
+            className="w-20 h-20 rounded-full bg-[#1E40AF] text-white flex items-center justify-center shadow-[0_15px_40px_rgba(30,64,175,0.6)] border-6 border-[#F0F2F5] active:scale-90 transition-all group overflow-hidden"
             style={{ width: '78px', height: '78px' }}
             aria-label={t('fab.addTransaction')}
           >
-            <div className="absolute inset-0 bg-gradient-to-tr from-blue-700/40 to-white/10 pointer-events-none"></div>
+            <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/40 to-white/10 pointer-events-none"></div>
             <i className="fa-solid fa-plus text-3xl group-active:rotate-90 transition-transform duration-300"></i>
           </button>
         </div>
@@ -58,7 +58,7 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, setActiveTab, on
             
             {/* Empty Center for FAB */}
             <div className="w-full flex items-center justify-center pt-10">
-               <span className="text-[10px] font-black text-blue-600/30 uppercase tracking-[0.2em]">Add</span>
+               <span className="text-[10px] font-black text-[#1E40AF]/30 uppercase tracking-[0.2em]">Add</span>
             </div>
             
             <NavItem icon="fa-list-ul" label={t('nav.history')} isActive={activeTab === 'transactions'} onClick={() => setActiveTab('transactions')} />

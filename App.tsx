@@ -58,7 +58,7 @@ const AppContent: React.FC = () => {
       <header className="px-6 pt-14 pb-4 shrink-0 bg-[#F0F2F5]/80 backdrop-blur-md z-30 relative">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-black tracking-tight text-[#1A1C2E]">
-            Xpense<span className="text-[#2563EB]">Flow</span>
+            Xpense<span className="text-[#1E40AF]">Flow</span>
           </h1>
           <div className="w-11 h-11 rounded-full logo-raised flex items-center justify-center border-2 border-white overflow-hidden active:scale-95 transition-all">
             <img 
