@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { db } from '../../firebaseConfig';
 import { collection, query, onSnapshot, addDoc, deleteDoc, doc, orderBy, setDoc } from 'firebase/firestore';
@@ -42,8 +43,12 @@ const sanitizeFirestoreData = (data: any): any => {
         sanitized[key] = val.toISOString();
       } else if (typeof val === 'object' && val.toDate && typeof val.toDate === 'function') {
         sanitized[key] = val.toDate().toISOString();
+      } else if (Array.isArray(val)) {
+        sanitized[key] = val.map(item => (typeof item === 'object' ? sanitizeFirestoreData(item) : item));
+      } else if (typeof val === 'object') {
+        // Handle nested objects safely
+        sanitized[key] = sanitizeFirestoreData(val);
       } else {
-        // Final fallback: stringify individual property if complex to avoid circle crawl
         sanitized[key] = String(val);
       }
     }
@@ -82,9 +87,10 @@ export const useTransactions = () => {
       return;
     }
     
-    const transactionsPath = collection(db, 'users', user.uid, 'transactions');
-    const subscriptionsPath = collection(db, 'users', user.uid, 'subscriptions');
-    const settingsDocRef = doc(db, 'users', user.uid, 'settings', 'config');
+    const uid = String(user.uid);
+    const transactionsPath = collection(db, 'users', uid, 'transactions');
+    const subscriptionsPath = collection(db, 'users', uid, 'subscriptions');
+    const settingsDocRef = doc(db, 'users', uid, 'settings', 'config');
 
     const transactionsQuery = query(transactionsPath, orderBy('date', 'desc'));
     const subscriptionsQuery = query(subscriptionsPath, orderBy('nextDueDate', 'asc'));
@@ -97,6 +103,7 @@ export const useTransactions = () => {
       setTransactions(fetched);
       setIsDataLoaded(true);
     }, (error) => {
+      console.warn("Transactions Sync Error:", sanitizeError(error));
       addToast(`Sync Error: ${sanitizeError(error)}`, 'error');
       setIsDataLoaded(true);
     });
@@ -108,14 +115,17 @@ export const useTransactions = () => {
       } as Subscription));
       setSubscriptions(fetched);
     }, (error) => {
+      console.warn("Subscriptions Sync Error:", sanitizeError(error));
       addToast(`Subscription Error: ${sanitizeError(error)}`, 'error');
     });
 
     const unsubscribeSettings = onSnapshot(settingsDocRef, (docSnap) => {
       if (docSnap.exists()) {
-        setSettings(docSnap.data() as Settings);
+        const rawData = docSnap.data();
+        setSettings(sanitizeFirestoreData(rawData) as Settings);
       }
     }, (error) => {
+      console.warn("Settings Sync Error:", sanitizeError(error));
       addToast(`Settings Error: ${sanitizeError(error)}`, 'error');
     });
 
@@ -137,7 +147,7 @@ export const useTransactions = () => {
     const baseAmount = convertCurrency(data.originalAmount, data.currency, settings.baseCurrency);
     const newTransaction = { ...data, amount: baseAmount, date: new Date().toISOString() };
     try {
-      await addDoc(collection(db, 'users', user.uid, 'transactions'), newTransaction);
+      await addDoc(collection(db, 'users', String(user.uid), 'transactions'), newTransaction);
       addToast('Transaction recorded!', 'success');
     } catch (error: any) {
       addToast(`Record error: ${sanitizeError(error)}`, 'error');
@@ -147,7 +157,7 @@ export const useTransactions = () => {
   const deleteTransaction = async (id: string) => {
     if (!user?.uid) return;
     try {
-      await deleteDoc(doc(db, 'users', user.uid, 'transactions', id));
+      await deleteDoc(doc(db, 'users', String(user.uid), 'transactions', id));
       addToast('Transaction removed.', 'info');
     } catch(error: any) {
       addToast(`Delete failed: ${sanitizeError(error)}`, 'error');
@@ -157,7 +167,7 @@ export const useTransactions = () => {
   const addSubscription = async (data: Omit<Subscription, 'id'>) => {
     if (!user?.uid) return;
     try {
-      await addDoc(collection(db, 'users', user.uid, 'subscriptions'), data);
+      await addDoc(collection(db, 'users', String(user.uid), 'subscriptions'), data);
       addToast('Subscription added!', 'success');
     } catch (error: any) {
        addToast(`Add error: ${sanitizeError(error)}`, 'error');
@@ -167,7 +177,7 @@ export const useTransactions = () => {
   const deleteSubscription = async (id: string) => {
     if (!user?.uid) return;
      try {
-      await deleteDoc(doc(db, 'users', user.uid, 'subscriptions', id));
+      await deleteDoc(doc(db, 'users', String(user.uid), 'subscriptions', id));
       addToast('Subscription removed.', 'info');
     } catch(error: any) {
       addToast(`Delete error: ${sanitizeError(error)}`, 'error');
@@ -177,7 +187,7 @@ export const useTransactions = () => {
   const updateSettings = async (newSettings: Partial<Settings>) => {
     if (!user?.uid) return;
     try {
-      await setDoc(doc(db, 'users', user.uid, 'settings', 'config'), { ...settings, ...newSettings });
+      await setDoc(doc(db, 'users', String(user.uid), 'settings', 'config'), { ...settings, ...newSettings });
     } catch (error: any) {
       addToast(`Settings error: ${sanitizeError(error)}`, 'error');
     }
@@ -225,7 +235,7 @@ export const useTransactions = () => {
         t.title,
         t.category,
         t.type,
-        `${CURRENCIES[t.currency].symbol}${t.originalAmount.toFixed(2)}`
+        `${CURRENCIES[t.currency as CurrencyCode]?.symbol || '$'}${t.originalAmount.toFixed(2)}`
       ]);
 
       docPdf.autoTable({

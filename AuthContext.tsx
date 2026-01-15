@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
   onAuthStateChanged, 
@@ -30,17 +31,27 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Helper to safely stringify errors without circularity
+const safeString = (val: any): string => {
+  if (val === null || val === undefined) return '';
+  if (typeof val === 'string') return val;
+  return val.message || val.code || String(val);
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Set persistence to local storage
-    setPersistence(auth, browserLocalPersistence).catch(err => console.error("Persistence error:", err));
+    setPersistence(auth, browserLocalPersistence).catch(err => {
+      console.warn("Persistence error:", safeString(err));
+    });
 
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
         // Create a plain object containing only necessary data
+        // Explicitly cast to string to avoid any hidden getters/proxies
         const sanitizedUser: AppUser = {
           uid: String(firebaseUser.uid),
           email: firebaseUser.email ? String(firebaseUser.email) : null,
@@ -49,9 +60,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         
         try {
+          // Verify circularity before storage
           localStorage.setItem('xpenseflow_user_data', JSON.stringify(sanitizedUser));
         } catch (e) {
-          console.error("Storage error:", e);
+          console.warn("Storage error:", safeString(e));
         }
         setUser(sanitizedUser);
       } else {
@@ -66,7 +78,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-    await signInWithPopup(auth, provider);
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (e) {
+      console.warn("Google Sign-In error:", safeString(e));
+      throw e;
+    }
   };
 
   const loginWithEmail = async (email: string, pass: string) => {

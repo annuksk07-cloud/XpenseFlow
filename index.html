@@ -16,8 +16,8 @@
     <meta name="theme-color" content="#1E40AF" />
     <meta name="mobile-web-app-capable" content="yes" />
     
-    <!-- PWA Manifest - Data URI for immediate cross-platform compatibility -->
-    <link rel="manifest" href='data:application/json,{"name":"XpenseFlow Expense Tracker","short_name":"XpenseFlow","start_url":"/","display":"standalone","background_color":"#F0F2F5","theme_color":"#1E40AF","description":"Professional PWA expense tracker with offline support and receipt scanning.","icons":[{"src":"https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}' />
+    <!-- PWA Manifest - Data URI for origin-independent installation -->
+    <link rel="manifest" href='data:application/json,{"name":"XpenseFlow","short_name":"XpenseFlow","start_url":"/","display":"standalone","background_color":"#F0F2F5","theme_color":"#1E40AF","icons":[{"src":"https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}' />
 
     <!-- External Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -115,20 +115,26 @@
     }
     </script>
     
-    <!-- Robust Service Worker Registration -->
+    <!-- Strictly Relative, Origin-Aware Service Worker Registration -->
     <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          // Use the physical sw.js file
-          navigator.serviceWorker.register('./sw.js')
-            .then(reg => {
-              console.log('XpenseFlow SW registered successfully on origin:', window.location.origin);
-            })
-            .catch(err => {
-              console.warn('XpenseFlow: PWA Service Worker registration failed.', err.message);
-            });
-        });
-      }
+      (function() {
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            // We use a strictly relative path './sw.js'. 
+            // Most preview environments block 'blob:' protocols for SWs.
+            // Using a physical file on the same origin is the ONLY supported method.
+            navigator.serviceWorker.register('./sw.js', { scope: './' })
+              .then(reg => {
+                console.log('XpenseFlow: PWA Service Worker active.');
+              })
+              .catch(err => {
+                // In cross-origin frames or specific preview sandboxes, SW registration will naturally fail.
+                // We catch this silently to prevent red error logs while allowing PWA to work on real domains.
+                console.info('XpenseFlow: Service Worker suppressed (expected in some preview environments).', err.message);
+              });
+          });
+        }
+      })();
     </script>
   </head>
   <body>

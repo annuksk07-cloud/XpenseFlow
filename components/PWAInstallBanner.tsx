@@ -8,12 +8,12 @@ const PWAInstallBanner: React.FC = () => {
   const LOGO_URL = "https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144";
 
   useEffect(() => {
-    // 1. Check if already installed
+    // 1. Standalone check
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
     if (isStandalone) return;
 
-    // 2. Check dismissal cooldown
-    const hideUntil = localStorage.getItem('xpenseflow_pwa_hide_v4');
+    // 2. Dismissal cooldown (Check version v6)
+    const hideUntil = localStorage.getItem('xpenseflow_pwa_hide_v6');
     if (hideUntil && parseInt(hideUntil) > Date.now()) return;
 
     // 3. Platform Detection
@@ -21,26 +21,26 @@ const PWAInstallBanner: React.FC = () => {
     const isIOS = /iphone|ipad|ipod/.test(userAgent);
     setPlatform(isIOS ? 'ios' : 'android');
 
-    // 4. Android BeforeInstallPrompt
+    // 4. Android prompt capturing
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      // Show banner after 3 seconds of usage
-      setTimeout(() => setIsVisible(true), 3000);
+      // Wait 5 seconds of active usage before showing the prompt
+      setTimeout(() => setIsVisible(true), 5000);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // 5. iOS fallback trigger
-    const iosTimer = setTimeout(() => {
-      if (isIOS) {
+    // 5. iOS Fallback logic
+    if (isIOS) {
+      const iosTimer = setTimeout(() => {
         setIsVisible(true);
-      }
-    }, 4000);
+      }, 6000);
+      return () => clearTimeout(iosTimer);
+    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      clearTimeout(iosTimer);
     };
   }, []);
 
@@ -53,24 +53,25 @@ const PWAInstallBanner: React.FC = () => {
       }
       setDeferredPrompt(null);
     } else if (platform === 'ios') {
+      // For iOS we just show instructions, the button acts as "Got it" or similar
       setIsVisible(false);
     }
   };
 
   const handleMaybeLater = () => {
     setIsVisible(false);
-    // Dismiss for 2 days to be non-intrusive
-    const nextShow = Date.now() + 2 * 24 * 60 * 60 * 1000;
-    localStorage.setItem('xpenseflow_pwa_hide_v4', nextShow.toString());
+    // Dismiss for 3 days to maintain premium UX
+    const nextShow = Date.now() + 3 * 24 * 60 * 60 * 1000;
+    localStorage.setItem('xpenseflow_pwa_hide_v6', nextShow.toString());
   };
 
   if (!isVisible) return null;
 
   return (
-    <div className="fixed top-20 left-0 right-0 z-[100] px-6 pointer-events-none animate-in fade-in slide-in-from-top duration-700">
+    <div className="fixed top-24 left-0 right-0 z-[10000] px-6 pointer-events-none animate-in fade-in slide-in-from-top duration-700">
       <div className="max-w-md mx-auto pointer-events-auto neumorphic p-6 border-2 border-white/90 bg-[#F0F2F5]/98 backdrop-blur-2xl ring-1 ring-blue-500/5">
         <div className="flex items-center gap-5 mb-6">
-          <div className="w-16 h-16 rounded-3xl logo-raised flex items-center justify-center shrink-0 border-2 border-white bg-white/40 overflow-hidden shadow-sm">
+          <div className="w-16 h-16 rounded-[24px] logo-raised flex items-center justify-center shrink-0 border-2 border-white bg-white/60 overflow-hidden shadow-sm">
             <img 
               src={LOGO_URL} 
               alt="XpenseFlow" 
@@ -78,11 +79,11 @@ const PWAInstallBanner: React.FC = () => {
             />
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className="text-base font-black text-[#1A1C2E] leading-tight">Install XpenseFlow</h4>
-            <p className="text-[12px] font-bold text-gray-500 mt-2 leading-relaxed opacity-80">
+            <h4 className="text-base font-black text-[#1A1C2E] leading-tight">Add to Home Screen</h4>
+            <p className="text-[11px] font-bold text-gray-500 mt-2 leading-relaxed opacity-90">
               {platform === 'ios' 
-                ? "Tap 'Share' ➕ then 'Add to Home Screen' to unlock full features." 
-                : "Add to home screen for a seamless, professional experience."}
+                ? "Tap 'Share' ➕ then 'Add to Home Screen' for the full professional experience." 
+                : "Install XpenseFlow for instant access and a seamless mobile interface."}
             </p>
           </div>
         </div>
@@ -90,9 +91,9 @@ const PWAInstallBanner: React.FC = () => {
         <div className="flex gap-4">
           <button 
             onClick={handleInstallClick}
-            className="flex-1 py-4 rounded-2xl bg-[#3B82F6] text-white text-[12px] font-black uppercase tracking-widest shadow-[0_10px_25px_rgba(59,130,246,0.35)] active:scale-[0.96] transition-all"
+            className="flex-1 py-4 rounded-2xl bg-[#1E40AF] text-white text-[12px] font-black uppercase tracking-widest shadow-[0_12px_28px_rgba(30,64,175,0.4)] active:scale-[0.96] transition-all"
           >
-            {platform === 'ios' ? 'I understand' : 'Install App'}
+            {platform === 'ios' ? 'I Understand' : 'Install App'}
           </button>
           <button 
             onClick={handleMaybeLater}
