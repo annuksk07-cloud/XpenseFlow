@@ -78,6 +78,13 @@ export const translations = {
         baseCurrency: 'Base Currency',
         stealthMode: 'Stealth Mode',
         stealthModeDesc: 'Blur sensitive numbers',
+        showOriginalCurrency: 'Original Currency',
+        showOriginalCurrencyDesc: 'Show native amount next to converted total',
+        exchangeRates: 'Exchange Rates',
+        ratesReference: 'Reference Rates',
+        resetRates: 'Reset to System Defaults',
+        show: 'Show',
+        hide: 'Hide',
         dataBackup: 'Data & Backup',
         exportCSV: 'Export to CSV',
         exportPDF: 'Export to PDF',
@@ -101,11 +108,19 @@ export const translations = {
     },
     header: { goPro: 'Hazte Pro' },
     nav: { home: 'Inicio', analytics: 'Análisis', history: 'Historial', settings: 'Ajustes' },
+    modals: {
+        showOriginalCurrency: 'Moneda Original',
+        showOriginalCurrencyDesc: 'Ver monto nativo junto al total convertido',
+        exchangeRates: 'Tipos de Cambio',
+        ratesReference: 'Tasas de Referencia',
+        resetRates: 'Restablecer Valores Predeterminados',
+        show: 'Mostrar',
+        hide: 'Ocultar'
+    },
     categories: {
         Food: 'Comida', Transport: 'Transporte', Shopping: 'Compras', Bills: 'Cuentas', Entertainment: 'Entretenimiento', Health: 'Salud',
         Salary: 'Salario', Investment: 'Inversión', Other: 'Otro'
     }
-    // ... Simplified for brevity in this block, actual file would have full keys
   },
   hi: {
     login: {
@@ -114,6 +129,15 @@ export const translations = {
       noAccount: 'खाता नहीं है? ', hasAccount: 'पहले से ही खाता है? ', signUp: 'साइन अप करें',
     },
     nav: { home: 'होम', analytics: 'विश्लेषण', history: 'इतिहास', settings: 'सेटिंग्स' },
+    modals: {
+        showOriginalCurrency: 'मूल मुद्रा',
+        showOriginalCurrencyDesc: 'परिवर्तित कुल के आगे मूल राशि दिखाएं',
+        exchangeRates: 'विनिमय दरें',
+        ratesReference: 'संदर्भ दरें',
+        resetRates: 'डिफ़ॉल्ट पर रीसेट करें',
+        show: 'दिखाएं',
+        hide: 'छिपाएं'
+    },
     categories: {
         Food: 'भोजन', Transport: 'परिवहन', Shopping: 'खरीदारी', Bills: 'बिल', Entertainment: 'मनोरंजन', Health: 'स्वास्थ्य',
         Salary: 'वेतन', Investment: 'निवेश', Other: 'अन्य'
@@ -126,6 +150,15 @@ export const translations = {
       noAccount: "Vous n'avez pas de compte ? ", hasAccount: 'Vous avez déjà un compte ? ', signUp: "S'inscrire",
     },
     nav: { home: 'Accueil', analytics: 'Analyse', history: 'Historique', settings: 'Réglages' },
+    modals: {
+        showOriginalCurrency: 'Devise d\'Origine',
+        showOriginalCurrencyDesc: 'Afficher le montant natif à côté du total converti',
+        exchangeRates: 'Taux de Change',
+        ratesReference: 'Taux de Référence',
+        resetRates: 'Réinitialiser aux Valeurs par Défaut',
+        show: 'Afficher',
+        hide: 'Masquer'
+    },
     categories: {
         Food: 'Nourriture', Transport: 'Transport', Shopping: 'Achats', Bills: 'Factures', Entertainment: 'Divertissement', Health: 'Santé',
         Salary: 'Salaire', Investment: 'Investissement', Other: 'Autre'

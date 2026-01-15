@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { db } from '../../firebaseConfig';
 import { collection, query, onSnapshot, addDoc, deleteDoc, doc, orderBy, setDoc } from 'firebase/firestore';
@@ -9,34 +8,20 @@ declare const window: any;
 
 const generateUUID = () => crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => (Math.random() * 16 | 0).toString(16));
 
-/**
- * CIRCULAR-SAFE ERROR SANITIZER
- * Explicitly converts complex error objects into primitive strings to prevent JSON circularity crashes.
- */
 const sanitizeError = (err: any): string => {
   if (err === null || err === undefined) return 'Unknown error';
   if (typeof err === 'string') return err;
-  
-  // Try to find a primitive message property
   const possibleMessage = err.message || err.code || err.reason;
   if (typeof possibleMessage === 'string') return possibleMessage;
-  
-  // Use String constructor for a shallow, non-recursive string conversion
   return String(err);
 };
 
-/**
- * DEEP DATA PURIFICATION
- * Ensures Firestore data is mapped to plain objects, converting special types like Timestamps to ISO strings.
- */
 const sanitizeFirestoreData = (data: any): any => {
   if (!data || typeof data !== 'object') return data;
-  
   const sanitized: any = {};
   for (const key in data) {
     if (Object.prototype.hasOwnProperty.call(data, key)) {
       const val = data[key];
-      
       if (val === null || typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
         sanitized[key] = val;
       } else if (val instanceof Date) {
@@ -46,7 +31,6 @@ const sanitizeFirestoreData = (data: any): any => {
       } else if (Array.isArray(val)) {
         sanitized[key] = val.map(item => (typeof item === 'object' ? sanitizeFirestoreData(item) : item));
       } else if (typeof val === 'object') {
-        // Handle nested objects safely
         sanitized[key] = sanitizeFirestoreData(val);
       } else {
         sanitized[key] = String(val);
@@ -65,6 +49,8 @@ export const useTransactions = () => {
     savingsGoal: 5000,
     baseCurrency: 'USD',
     isPrivacyMode: false,
+    showOriginalCurrency: false,
+    customRates: {},
   });
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
@@ -103,7 +89,6 @@ export const useTransactions = () => {
       setTransactions(fetched);
       setIsDataLoaded(true);
     }, (error) => {
-      console.warn("Transactions Sync Error:", sanitizeError(error));
       addToast(`Sync Error: ${sanitizeError(error)}`, 'error');
       setIsDataLoaded(true);
     });
@@ -115,17 +100,15 @@ export const useTransactions = () => {
       } as Subscription));
       setSubscriptions(fetched);
     }, (error) => {
-      console.warn("Subscriptions Sync Error:", sanitizeError(error));
       addToast(`Subscription Error: ${sanitizeError(error)}`, 'error');
     });
 
     const unsubscribeSettings = onSnapshot(settingsDocRef, (docSnap) => {
       if (docSnap.exists()) {
         const rawData = docSnap.data();
-        setSettings(sanitizeFirestoreData(rawData) as Settings);
+        setSettings(prev => ({ ...prev, ...sanitizeFirestoreData(rawData) }));
       }
     }, (error) => {
-      console.warn("Settings Sync Error:", sanitizeError(error));
       addToast(`Settings Error: ${sanitizeError(error)}`, 'error');
     });
 
@@ -136,11 +119,16 @@ export const useTransactions = () => {
     };
   }, [user?.uid, addToast]);
 
-  const convertCurrency = (amount: number, from: CurrencyCode, to: CurrencyCode) => {
-    const fromRate = CURRENCIES[from]?.rate || 1;
-    const toRate = CURRENCIES[to]?.rate || 1;
+  const getEffectiveRate = useCallback((code: CurrencyCode) => {
+    return settings.customRates?.[code] ?? CURRENCIES[code].rate;
+  }, [settings.customRates]);
+
+  const convertCurrency = useCallback((amount: number, from: CurrencyCode, to: CurrencyCode) => {
+    if (from === to) return amount;
+    const fromRate = getEffectiveRate(from);
+    const toRate = getEffectiveRate(to);
     return (amount / fromRate) * toRate;
-  };
+  }, [getEffectiveRate]);
 
   const addTransaction = async (data: Omit<Transaction, 'id' | 'amount' | 'date'>) => {
     if (!user?.uid) return;
@@ -187,7 +175,8 @@ export const useTransactions = () => {
   const updateSettings = async (newSettings: Partial<Settings>) => {
     if (!user?.uid) return;
     try {
-      await setDoc(doc(db, 'users', String(user.uid), 'settings', 'config'), { ...settings, ...newSettings });
+      const merged = { ...settings, ...newSettings };
+      await setDoc(doc(db, 'users', String(user.uid), 'settings', 'config'), merged);
     } catch (error: any) {
       addToast(`Settings error: ${sanitizeError(error)}`, 'error');
     }
@@ -195,22 +184,36 @@ export const useTransactions = () => {
 
   const stats: Stats = useMemo(() => {
     return transactions.reduce((acc, t) => {
+      const liveConverted = convertCurrency(t.originalAmount, t.currency, settings.baseCurrency);
+      
       if (t.type === TransactionType.INCOME) {
-        acc.totalIncome += t.amount;
-        acc.totalBalance += t.amount;
+        acc.totalIncome += liveConverted;
+        acc.totalBalance += liveConverted;
       } else {
-        acc.totalExpense += t.amount;
-        acc.totalBalance -= t.amount;
+        acc.totalExpense += liveConverted;
+        acc.totalBalance -= liveConverted;
       }
       return acc;
     }, { totalBalance: 0, totalIncome: 0, totalExpense: 0 });
-  }, [transactions]);
+  }, [transactions, settings.baseCurrency, convertCurrency]);
 
   const exportToCSV = () => {
     try {
       if (transactions.length === 0) return;
-      const headers = 'Date,Title,Category,Type,Amount,Currency\n';
-      const rows = transactions.map(t => [new Date(t.date).toLocaleDateString(), t.title, t.category, t.type, t.originalAmount, t.currency].join(',')).join('\n');
+      const headers = 'Date,Title,Category,Type,Amount,Currency,BaseAmount,BaseCurrency\n';
+      const rows = transactions.map(t => {
+        const baseAmt = convertCurrency(t.originalAmount, t.currency, settings.baseCurrency);
+        return [
+          new Date(t.date).toLocaleDateString(), 
+          t.title, 
+          t.category, 
+          t.type, 
+          t.originalAmount, 
+          t.currency,
+          baseAmt.toFixed(2),
+          settings.baseCurrency
+        ].join(',');
+      }).join('\n');
       const blob = new Blob([headers + rows], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
@@ -230,13 +233,16 @@ export const useTransactions = () => {
       docPdf.setFontSize(18);
       docPdf.text("XpenseFlow Financial Report", 14, 22);
       
-      const tableRows = transactions.map(t => [
-        new Date(t.date).toLocaleDateString(),
-        t.title,
-        t.category,
-        t.type,
-        `${CURRENCIES[t.currency as CurrencyCode]?.symbol || '$'}${t.originalAmount.toFixed(2)}`
-      ]);
+      const tableRows = transactions.map(t => {
+        const liveConverted = convertCurrency(t.originalAmount, t.currency, settings.baseCurrency);
+        return [
+          new Date(t.date).toLocaleDateString(),
+          t.title,
+          t.category,
+          t.type,
+          `${CURRENCIES[t.currency as CurrencyCode]?.symbol || '$'}${t.originalAmount.toFixed(2)} (${CURRENCIES[settings.baseCurrency].symbol}${liveConverted.toFixed(2)})`
+        ];
+      });
 
       docPdf.autoTable({
         head: [["Date", "Title", "Category", "Type", "Amount"]],
@@ -253,5 +259,21 @@ export const useTransactions = () => {
     }
   };
 
-  return { transactions, addTransaction, deleteTransaction, subscriptions, addSubscription, deleteSubscription, stats, settings, updateSettings, toasts, removeToast, exportToCSV, exportToPDF, isDataLoaded };
+  return { 
+    transactions, 
+    addTransaction, 
+    deleteTransaction, 
+    subscriptions, 
+    addSubscription, 
+    deleteSubscription, 
+    stats, 
+    settings, 
+    updateSettings, 
+    toasts, 
+    removeToast, 
+    exportToCSV, 
+    exportToPDF, 
+    isDataLoaded,
+    convertCurrency 
+  };
 };

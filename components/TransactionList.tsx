@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Transaction, Settings, TransactionType } from '../types';
+import { Transaction, Settings, TransactionType, CurrencyCode, CURRENCIES } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface TransactionListProps {
@@ -24,7 +23,19 @@ const getCategoryIcon = (category: string) => {
 
 const TransactionList: React.FC<TransactionListProps> = ({ transactions, onDelete, settings }) => {
   const { t } = useLanguage();
-  const formatCurrency = (amount: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: settings.baseCurrency }).format(amount);
+  
+  const convertCurrency = (amount: number, from: CurrencyCode, to: CurrencyCode) => {
+    if (from === to) return amount;
+    const fromRate = CURRENCIES[from]?.rate || 1;
+    const toRate = CURRENCIES[to]?.rate || 1;
+    return (amount / fromRate) * toRate;
+  };
+
+  const formatCurrency = (amount: number, currency: CurrencyCode) => 
+    new Intl.NumberFormat('en-US', { 
+      style: 'currency', 
+      currency: currency 
+    }).format(amount);
 
   return (
     <div className="pb-10">
@@ -38,27 +49,39 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, onDelet
         </div>
       ) : (
         <div className="space-y-6">
-          {transactions.map(t => (
-            <div key={t.id} className="group flex items-center justify-between p-5 neumorphic animate-fade-in-up">
-              <div className="flex items-center gap-4 flex-1 min-w-0">
-                <div className={`shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-lg neumorphic-inset`}>
-                  <i className={`fa-solid ${getCategoryIcon(t.category)} ${t.type === TransactionType.INCOME ? 'text-emerald-500' : 'text-rose-500'}`}></i>
+          {transactions.map(item => {
+            const liveConvertedAmount = convertCurrency(item.originalAmount, item.currency, settings.baseCurrency);
+            const needsOriginal = settings.showOriginalCurrency && item.currency !== settings.baseCurrency;
+
+            return (
+              <div key={item.id} className="group flex items-center justify-between p-5 neumorphic animate-fade-in-up">
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className={`shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-lg neumorphic-inset`}>
+                    <i className={`fa-solid ${getCategoryIcon(item.category)} ${item.type === TransactionType.INCOME ? 'text-emerald-500' : 'text-rose-500'}`}></i>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-[#1A1C2E] truncate pr-2">{item.title}</p>
+                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{new Date(item.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="font-bold text-[#1A1C2E] truncate pr-2">{t.title}</p>
-                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className={`font-black text-base leading-tight ${item.type === TransactionType.INCOME ? 'text-emerald-500' : 'text-rose-500'}`}>
+                      {item.type === TransactionType.INCOME ? '+' : '-'}{formatCurrency(Math.abs(liveConvertedAmount), settings.baseCurrency)}
+                    </p>
+                    {needsOriginal && (
+                      <p className="text-[10px] font-bold text-gray-400">
+                        {formatCurrency(item.originalAmount, item.currency)}
+                      </p>
+                    )}
+                  </div>
+                  <button onClick={() => onDelete(item.id)} className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center text-gray-400 active:text-rose-500 neumorphic-flat !rounded-full active:neumorphic-pressed transition-all">
+                    <i className="fa-solid fa-trash-can text-sm"></i>
+                  </button>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className={`font-black text-base ${t.type === TransactionType.INCOME ? 'text-emerald-500' : 'text-rose-500'}`}>
-                  {t.type === TransactionType.INCOME ? '+' : '-'}{formatCurrency(Math.abs(t.amount))}
-                </span>
-                <button onClick={() => onDelete(t.id)} className="w-10 h-10 shrink-0 rounded-full flex items-center justify-center text-gray-400 active:text-rose-500 neumorphic-flat !rounded-full active:neumorphic-pressed transition-all">
-                  <i className="fa-solid fa-trash-can text-sm"></i>
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

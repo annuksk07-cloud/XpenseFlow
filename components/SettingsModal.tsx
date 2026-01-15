@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Settings, CURRENCIES, CurrencyCode } from '../types';
 import { useAuth } from '../AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -23,10 +23,23 @@ const LANGUAGES: { code: Language, name: string }[] = [
 const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings, updateSettings, onExportCSV, onExportPDF }) => {
   const { logout } = useAuth();
   const { t, language, setLanguage } = useLanguage();
+  const [showRates, setShowRates] = useState(false);
   
   if (!isOpen) return null;
 
   const currentCurrencySymbol = CURRENCIES[settings.baseCurrency].symbol;
+
+  const handleRateChange = (code: CurrencyCode, value: string) => {
+    const numValue = parseFloat(value);
+    if (isNaN(numValue)) return;
+    
+    const newCustomRates = { ...settings.customRates, [code]: numValue };
+    updateSettings({ customRates: newCustomRates });
+  };
+
+  const resetRates = () => {
+    updateSettings({ customRates: {} });
+  };
 
   return (
     <div className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm px-4" onClick={onClose}>
@@ -53,10 +66,57 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
             <div className="grid grid-cols-3 gap-3">
               {Object.keys(CURRENCIES).map(code => (
                  <button key={code} onClick={() => updateSettings({ baseCurrency: code as CurrencyCode })} className={`px-3 py-3 rounded-2xl font-bold text-sm transition-all ${settings.baseCurrency === code ? 'neumorphic-pressed !rounded-2xl text-blue-600' : 'neumorphic-flat !rounded-2xl text-gray-700'}`}>
-                  {code}
+                  {code} ({CURRENCIES[code as CurrencyCode].symbol})
                 </button>
               ))}
             </div>
+          </section>
+
+          {/* New Exchange Rates Section */}
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <label className="font-bold text-xs uppercase tracking-widest text-gray-400 block">{t('modals.exchangeRates')}</label>
+              <button onClick={() => setShowRates(!showRates)} className="text-[10px] font-black text-blue-600 uppercase tracking-widest px-3 py-1 neumorphic-flat !rounded-full active:neumorphic-pressed transition-all">
+                {showRates ? t('modals.hide') : t('modals.show')}
+              </button>
+            </div>
+            
+            {showRates && (
+              <div className="space-y-4 animate-in fade-in duration-300">
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight ml-1 mb-2">
+                  {t('modals.ratesReference')} (1 USD = ?)
+                </p>
+                <div className="grid grid-cols-1 gap-4">
+                  {(Object.keys(CURRENCIES) as CurrencyCode[]).map(code => {
+                    if (code === 'USD') return null;
+                    const currentRate = settings.customRates?.[code] ?? CURRENCIES[code].rate;
+                    return (
+                      <div key={code} className="flex items-center gap-4 p-4 neumorphic-inset rounded-2xl">
+                        <div className="w-12 h-12 rounded-xl neumorphic-flat flex items-center justify-center font-black text-blue-600">
+                          {CURRENCIES[code].symbol}
+                        </div>
+                        <div className="flex-1">
+                           <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">{code} Rate</p>
+                           <input 
+                              type="number" 
+                              step="0.001"
+                              value={currentRate} 
+                              onChange={(e) => handleRateChange(code, e.target.value)}
+                              className="w-full bg-transparent outline-none text-[#1A1C2E] font-bold text-sm" 
+                           />
+                        </div>
+                        <div className="text-[10px] font-bold text-blue-500 uppercase">
+                          {settings.customRates?.[code] ? 'Custom' : 'Default'}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <button onClick={resetRates} className="w-full py-3 text-[10px] font-black text-rose-500 uppercase tracking-widest neumorphic-flat !rounded-2xl active:neumorphic-pressed transition-all mt-2">
+                  {t('modals.resetRates')}
+                </button>
+              </div>
+            )}
           </section>
 
           <section>
@@ -90,9 +150,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
             </div>
           </section>
 
-          <section className="flex items-center justify-between p-5 rounded-3xl neumorphic-inset">
-             <div><p className="font-bold text-sm text-[#1A1C2E]">{t('modals.stealthMode')}</p><p className="text-[10px] text-gray-500">{t('modals.stealthModeDesc')}</p></div>
-             <button onClick={() => updateSettings({ isPrivacyMode: !settings.isPrivacyMode })} className={`w-14 h-7 rounded-full relative transition-colors ${settings.isPrivacyMode ? 'bg-blue-600' : 'neumorphic-pressed !rounded-full'}`}><div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all duration-300 ${settings.isPrivacyMode ? 'left-8' : 'left-1'}`}></div></button>
+          <section className="space-y-4">
+            <div className="flex items-center justify-between p-5 rounded-3xl neumorphic-inset">
+               <div><p className="font-bold text-sm text-[#1A1C2E]">{t('modals.stealthMode')}</p><p className="text-[10px] text-gray-500">{t('modals.stealthModeDesc')}</p></div>
+               <button onClick={() => updateSettings({ isPrivacyMode: !settings.isPrivacyMode })} className={`w-14 h-7 rounded-full relative transition-colors ${settings.isPrivacyMode ? 'bg-blue-600' : 'neumorphic-pressed !rounded-full'}`}><div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all duration-300 ${settings.isPrivacyMode ? 'left-8' : 'left-1'}`}></div></button>
+            </div>
+
+            <div className="flex items-center justify-between p-5 rounded-3xl neumorphic-inset">
+               <div><p className="font-bold text-sm text-[#1A1C2E]">{t('modals.showOriginalCurrency')}</p><p className="text-[10px] text-gray-500">{t('modals.showOriginalCurrencyDesc')}</p></div>
+               <button onClick={() => updateSettings({ showOriginalCurrency: !settings.showOriginalCurrency })} className={`w-14 h-7 rounded-full relative transition-colors ${settings.showOriginalCurrency ? 'bg-blue-600' : 'neumorphic-pressed !rounded-full'}`}><div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all duration-300 ${settings.showOriginalCurrency ? 'left-8' : 'left-1'}`}></div></button>
+            </div>
           </section>
 
           <section className="space-y-4">

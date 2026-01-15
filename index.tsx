@@ -1,17 +1,18 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import './index.css';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { AuthProvider } from './AuthContext';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <LanguageProvider>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </LanguageProvider>
-  </React.StrictMode>,
+const rootElement = document.getElementById('root');
+if (!rootElement) throw new Error('Root element not found');
+
+const root = ReactDOM.createRoot(rootElement);
+
+root.render(
+  <LanguageProvider>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </LanguageProvider>
 );

@@ -24,7 +24,7 @@ export interface Transaction {
   id: string;
   title: string;
   originalAmount: number;
-  amount: number; // Amount in base currency
+  amount: number; // Stored converted amount (at time of entry)
   currency: CurrencyCode;
   type: TransactionType;
   category: string;
@@ -45,6 +45,8 @@ export interface Settings {
   savingsGoal: number;
   baseCurrency: CurrencyCode;
   isPrivacyMode: boolean;
+  showOriginalCurrency: boolean;
+  customRates?: Partial<Record<CurrencyCode, number>>;
 }
 
 export interface Stats {
