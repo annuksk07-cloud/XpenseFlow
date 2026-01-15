@@ -16,7 +16,7 @@
     <meta name="theme-color" content="#1E40AF" />
     <meta name="mobile-web-app-capable" content="yes" />
     
-    <!-- PWA Manifest - Data URI for origin-independent installation -->
+    <!-- PWA Manifest - Data URI for immediate cross-platform compatibility and origin persistence -->
     <link rel="manifest" href='data:application/json,{"name":"XpenseFlow","short_name":"XpenseFlow","start_url":"/","display":"standalone","background_color":"#F0F2F5","theme_color":"#1E40AF","icons":[{"src":"https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}' />
 
     <!-- External Dependencies -->
@@ -115,22 +115,20 @@
     }
     </script>
     
-    <!-- Strictly Relative, Origin-Aware Service Worker Registration -->
+    <!-- PWA: Strictly Relative Registration -->
     <script>
       (function() {
         if ('serviceWorker' in navigator) {
           window.addEventListener('load', () => {
-            // We use a strictly relative path './sw.js'. 
-            // Most preview environments block 'blob:' protocols for SWs.
-            // Using a physical file on the same origin is the ONLY supported method.
-            navigator.serviceWorker.register('./sw.js', { scope: './' })
+            // Using strictly relative path for Service Worker to ensure same-origin requirement
+            // No Blob URLs to avoid 'protocol not supported' and 'origin mismatch' errors
+            navigator.serviceWorker.register('./sw.js', { scope: '/' })
               .then(reg => {
-                console.log('XpenseFlow: PWA Service Worker active.');
+                console.log('XpenseFlow: PWA Service Worker Registered Successfully on scope:', reg.scope);
               })
               .catch(err => {
-                // In cross-origin frames or specific preview sandboxes, SW registration will naturally fail.
-                // We catch this silently to prevent red error logs while allowing PWA to work on real domains.
-                console.info('XpenseFlow: Service Worker suppressed (expected in some preview environments).', err.message);
+                // Silent fail in restrictive preview environments, works on HTTPS production (Vercel)
+                console.info('XpenseFlow: Service Worker Registration Deferred.', err.message);
               });
           });
         }

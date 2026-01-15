@@ -8,12 +8,12 @@ const PWAInstallBanner: React.FC = () => {
   const LOGO_URL = "https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144";
 
   useEffect(() => {
-    // 1. Standalone check
+    // 1. Check if already running in standalone mode
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
     if (isStandalone) return;
 
-    // 2. Dismissal cooldown (Check version v6)
-    const hideUntil = localStorage.getItem('xpenseflow_pwa_hide_v6');
+    // 2. Dismissal cooldown check (v7)
+    const hideUntil = localStorage.getItem('xpenseflow_pwa_hide_v7');
     if (hideUntil && parseInt(hideUntil) > Date.now()) return;
 
     // 3. Platform Detection
@@ -21,21 +21,22 @@ const PWAInstallBanner: React.FC = () => {
     const isIOS = /iphone|ipad|ipod/.test(userAgent);
     setPlatform(isIOS ? 'ios' : 'android');
 
-    // 4. Android prompt capturing
+    // 4. Capture native install event (Chrome/Android/Desktop)
     const handleBeforeInstallPrompt = (e: any) => {
+      // Prevent browser from showing default mini-infobar
       e.preventDefault();
       setDeferredPrompt(e);
-      // Wait 5 seconds of active usage before showing the prompt
+      // Wait 5 seconds as requested before showing custom banner
       setTimeout(() => setIsVisible(true), 5000);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // 5. iOS Fallback logic
+    // 5. iOS Manual Trigger logic (since iOS doesn't support beforeinstallprompt)
     if (isIOS) {
       const iosTimer = setTimeout(() => {
         setIsVisible(true);
-      }, 6000);
+      }, 5000);
       return () => clearTimeout(iosTimer);
     }
 
@@ -46,23 +47,24 @@ const PWAInstallBanner: React.FC = () => {
 
   const handleInstallClick = async () => {
     if (platform === 'android' && deferredPrompt) {
+      // Show the native prompt
       deferredPrompt.prompt();
+      // Wait for user choice
       const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        setIsVisible(false);
-      }
+      console.log(`XpenseFlow: Install outcome: ${outcome}`);
+      setIsVisible(false);
       setDeferredPrompt(null);
     } else if (platform === 'ios') {
-      // For iOS we just show instructions, the button acts as "Got it" or similar
+      // For iOS, banner shows instructions; clicking hides the banner for the session
       setIsVisible(false);
     }
   };
 
   const handleMaybeLater = () => {
     setIsVisible(false);
-    // Dismiss for 3 days to maintain premium UX
-    const nextShow = Date.now() + 3 * 24 * 60 * 60 * 1000;
-    localStorage.setItem('xpenseflow_pwa_hide_v6', nextShow.toString());
+    // Dismiss for 2 days to maintain premium UX
+    const nextShow = Date.now() + 2 * 24 * 60 * 60 * 1000;
+    localStorage.setItem('xpenseflow_pwa_hide_v7', nextShow.toString());
   };
 
   if (!isVisible) return null;
@@ -79,11 +81,11 @@ const PWAInstallBanner: React.FC = () => {
             />
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className="text-base font-black text-[#1A1C2E] leading-tight">Add to Home Screen</h4>
+            <h4 className="text-base font-black text-[#1A1C2E] leading-tight">Install XpenseFlow</h4>
             <p className="text-[11px] font-bold text-gray-500 mt-2 leading-relaxed opacity-90">
               {platform === 'ios' 
                 ? "Tap 'Share' ➕ then 'Add to Home Screen' for the full professional experience." 
-                : "Install XpenseFlow for instant access and a seamless mobile interface."}
+                : "Add to home screen for instant access and a seamless mobile interface."}
             </p>
           </div>
         </div>
@@ -93,7 +95,7 @@ const PWAInstallBanner: React.FC = () => {
             onClick={handleInstallClick}
             className="flex-1 py-4 rounded-2xl bg-[#1E40AF] text-white text-[12px] font-black uppercase tracking-widest shadow-[0_12px_28px_rgba(30,64,175,0.4)] active:scale-[0.96] transition-all"
           >
-            {platform === 'ios' ? 'I Understand' : 'Install App'}
+            {platform === 'ios' ? 'Got It' : 'Install App'}
           </button>
           <button 
             onClick={handleMaybeLater}
