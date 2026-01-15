@@ -16,8 +16,8 @@
     <meta name="theme-color" content="#3B82F6" />
     <meta name="mobile-web-app-capable" content="yes" />
     
-    <!-- PWA Manifest - Mandatory for 'Install' option -->
-    <link rel="manifest" href='data:application/json,{"name":"XpenseFlow Tracker","short_name":"XpenseFlow","start_url":"./","display":"standalone","background_color":"#F0F2F5","theme_color":"#3B82F6","icons":[{"src":"https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144","sizes":"192x192","type":"image/png","purpose":"any"},{"src":"https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144","sizes":"512x512","type":"image/png","purpose":"any"}]}' />
+    <!-- PWA Manifest - Data URI to prevent cross-origin issues -->
+    <link rel="manifest" href='data:application/json,{"name":"XpenseFlow Tracker","short_name":"XpenseFlow","start_url":"/","display":"standalone","background_color":"#F0F2F5","theme_color":"#3B82F6","icons":[{"src":"https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}' />
 
     <!-- External Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -59,7 +59,7 @@
         flex: 1;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
-        padding-bottom: 120px;
+        padding-bottom: 140px;
       }
       /* Neumorphic UI Shadows */
       .neumorphic {
@@ -101,31 +101,34 @@
     </style>
 
     <script type="importmap">
-{
-  "imports": {
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "chart.js/": "https://esm.sh/chart.js@^4.5.1/",
-    "firebase/app": "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js",
-    "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js",
-    "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js",
-    "firebase/": "https://esm.sh/firebase@^12.7.0/"
-  }
-}
-</script>
-    <!-- Robust Service Worker Registration with Relative Pathing -->
+    {
+      "imports": {
+        "react/": "https://esm.sh/react@^19.2.3/",
+        "react": "https://esm.sh/react@^19.2.3",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+        "chart.js/": "https://esm.sh/chart.js@^4.5.1/",
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js",
+        "firebase/": "https://esm.sh/firebase@^12.7.0/"
+      }
+    }
+    </script>
+    
+    <!-- Robust Service Worker Registration -->
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          // Use a strictly relative path to current origin to avoid domain mismatch errors
-          // Wrap in a promise-based catch to prevent red errors in preview mode
-          navigator.serviceWorker.register('./sw.js')
+          // Use a relative path './sw.js' to ensure registration stays within the same origin preview scope
+          // This prevents the 'Origin Mismatch' error often caused by absolute path resolution to host domains
+          const swFile = './sw.js';
+          navigator.serviceWorker.register(swFile)
             .then(reg => {
-              console.log('PWA ServiceWorker registered successfully at same-origin scope');
+              console.log('XpenseFlow SW registered successfully on origin:', window.location.origin);
             })
             .catch(err => {
-              console.warn('PWA: Service Worker registration suppressed by environment/origin limits.', err.message);
+              // Graceful failure for restrictive environments
+              console.warn('XpenseFlow: PWA Service Worker suppressed by environment limits.', err.message);
             });
         });
       }

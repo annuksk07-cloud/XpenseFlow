@@ -25,29 +25,29 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, setActiveTab, on
       <div className="max-w-md mx-auto relative pointer-events-auto">
         
         {/* CENTERED BIG ACTION BUTTON (Overlapping FAB) */}
-        <div className="absolute left-1/2 -translate-x-1/2 -top-8 z-50">
+        <div className="absolute left-1/2 -translate-x-1/2 -top-10 z-50">
           <button
             onClick={onAddClick}
-            className="w-18 h-18 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-[0_12px_35px_rgba(59,130,246,0.6)] border-6 border-[#F0F2F5] active:scale-90 transition-all group overflow-hidden"
-            style={{ width: '74px', height: '74px' }}
+            className="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-[0_15px_40px_rgba(59,130,246,0.6)] border-6 border-[#F0F2F5] active:scale-90 transition-all group overflow-hidden"
+            style={{ width: '78px', height: '78px' }}
             aria-label={t('fab.addTransaction')}
           >
-            <div className="absolute inset-0 bg-gradient-to-tr from-blue-700/30 to-white/10 pointer-events-none"></div>
+            <div className="absolute inset-0 bg-gradient-to-tr from-blue-700/40 to-white/10 pointer-events-none"></div>
             <i className="fa-solid fa-plus text-3xl group-active:rotate-90 transition-transform duration-300"></i>
           </button>
         </div>
 
         {/* CUSTOM NOTCHED NAVIGATION DOCK SVG */}
-        <div className="relative w-full h-[95px] flex items-end">
+        <div className="relative w-full h-[100px] flex items-end">
           <svg 
             width="100%" 
-            height="95" 
-            viewBox="0 0 375 95" 
+            height="100" 
+            viewBox="0 0 375 100" 
             preserveAspectRatio="none" 
-            className="absolute bottom-0 left-0 filter drop-shadow-[0_-12px_32px_rgba(0,0,0,0.06)]"
+            className="absolute bottom-0 left-0 filter drop-shadow-[0_-15px_35px_rgba(0,0,0,0.08)]"
           >
             <path 
-              d="M0 32C0 14.3269 14.3269 0 32 0H120C130 0 138 0 144 6C152 14 158 48 187.5 48C217 48 223 14 231 6C237 0 245 0 255 0H343C360.673 0 375 14.3269 375 32V95H0V32Z" 
+              d="M0 32C0 14.3269 14.3269 0 32 0H115C125 0 135 0 142 8C152 20 158 52 187.5 52C217 52 223 20 233 8C240 0 250 0 260 0H343C360.673 0 375 14.3269 375 32V100H0V32Z" 
               fill="#F0F2F5" 
             />
           </svg>
@@ -57,8 +57,8 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, setActiveTab, on
             <NavItem icon="fa-chart-pie" label={t('nav.analytics')} isActive={activeTab === 'analytics'} onClick={() => setActiveTab('analytics')} />
             
             {/* Empty Center for FAB */}
-            <div className="w-full flex items-center justify-center pt-8">
-               <span className="text-[10px] font-black text-blue-600/20 uppercase tracking-tighter">Add</span>
+            <div className="w-full flex items-center justify-center pt-10">
+               <span className="text-[10px] font-black text-blue-600/30 uppercase tracking-[0.2em]">Add</span>
             </div>
             
             <NavItem icon="fa-list-ul" label={t('nav.history')} isActive={activeTab === 'transactions'} onClick={() => setActiveTab('transactions')} />

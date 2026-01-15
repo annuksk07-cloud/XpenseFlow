@@ -1,9 +1,9 @@
 /**
- * XpenseFlow Service Worker v3
- * Essential for the 'Add to Home Screen' prompt.
+ * XpenseFlow Service Worker v4
+ * Essential for PWA 'Install' prompt triggering.
  */
 
-const CACHE_NAME = 'xpenseflow-offline-v3';
+const CACHE_NAME = 'xpenseflow-offline-v4';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -14,14 +14,17 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Required fetch event handler for Chrome installability.
-  // We prioritize network for Firestore and dynamic assets.
+  // A non-empty fetch handler is a REQUIRED condition for PWA installability in Chromium.
+  // We prioritize the network for all requests to ensure real-time Firestore/Auth updates.
   if (event.request.mode === 'navigate' || event.request.url.includes('googleapis.com')) {
     return;
   }
   
-  // Basic strategy: Network only (Satisfies PWA check without interfering with dev env)
-  event.respondWith(fetch(event.request).catch(() => {
-    // Optional: Return offline fallback here
-  }));
+  // Basic 'Network-First' approach with a silent fallback
+  event.respondWith(
+    fetch(event.request).catch(() => {
+      // In a full offline app, you'd serve cached static assets here
+      return caches.match(event.request);
+    })
+  );
 });
