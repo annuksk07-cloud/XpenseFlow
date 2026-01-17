@@ -1,8 +1,8 @@
 {
-  "name": "Receipt & Expense Tracker",
-  "description": "A neumorphic-style mobile expense tracker to manage your daily transactions with persistent storage.",
   "requestFramePermissions": [
-    "microphone",
-    "camera"
-  ]
+    "camera",
+    "microphone"
+  ],
+  "name": "XpenseFlow Professional",
+  "description": "Premium Wealth and Receipt Management with AI Financial Insights"
 }

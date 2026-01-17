@@ -1,92 +1,548 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>XpenseFlow - Professional Expense Management</title>
+    <title>XpenseFlow - Professional Wealth Management</title>
     
-    <!-- 1. ROOT REDIRECT -->
-    <script>
-      (function() {
-        const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-        if (isStandalone && (window.location.pathname.endsWith('/') || window.location.pathname.endsWith('index.html'))) {
-          if (window.location.pathname !== '/') window.history.replaceState(null, '', '/');
-        }
-      })();
-    </script>
-
-    <!-- 2. CORRECT PWA MANIFEST LINK -->
-    <link rel="manifest" href="manifest.json" />
-
-    <!-- Meta Tags -->
+    <!-- PWA Manifest Inline -->
+    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIlhwZW5zZUZsb3ciLAogICJzaG9ydF9uYW1lIjogIlhwZW5zZUZsb3ciLAogICJzdGFydF91cmwiOiAiLyIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI0YwRjJGNSIsCiAgInRoZW1lX2NvbG9yIjogIiMxRTQwQUYiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL2lrLmltYWdla2l0LmlvLzEzcGNtcXF6bi8xMDAwMTY5MjM5LXJlbW9vZWJnLXByZXZpZXclMjAoMSkucG5nP3VwZGF0ZWRBdD0xNzY4MzQ5OTUzMTQ0IiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgXQp9" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="XpenseFlow" />
     <meta name="theme-color" content="#1E40AF" />
-
-    <!-- External Assets -->
     <link rel="icon" type="image/png" href="https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144" />
-    <link rel="apple-touch-icon" href="https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet" />
+
+    <!-- CDN Libraries -->
+    <script src="https://cdn.tailwindcss.com" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <!-- Core React -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" defer></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" defer></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js" defer></script>
+    
+    <!-- Utilities -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    
+    <!-- Firebase Compat v10.7.1 -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js" defer></script>
 
     <style>
-      :root { --app-bg: #F0F2F5; --accent-blue: #1E40AF; }
-      html, body { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; position: fixed; background-color: var(--app-bg); font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-      #root { height: 100dvh; width: 100%; overflow: hidden; display: flex; flex-direction: column; }
-      .scroll-container { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 140px; }
-      
-      .neumorphic { background: #F0F2F5; border-radius: 28px; box-shadow: 10px 10px 20px #d1d9e6, -10px -10px 20px #ffffff; }
-      .neumorphic-inset { background: #F0F2F5; box-shadow: inset 5px 5px 10px #d1d9e6, inset -5px -5px 10px #ffffff; }
-      .neumorphic-flat { background: #F0F2F5; box-shadow: 5px 5px 10px #d1d9e6, -5px -5px 10px #ffffff; }
-      .neumorphic-pressed { background: #F0F2F5; box-shadow: inset 3px 3px 6px #b8b9be, inset -3px -3px 6px #ffffff; }
-      .logo-raised { background: #F0F2F5; box-shadow: 4px 4px 10px #d1d9e6, -4px -4px 10px #ffffff; }
-      
-      .shimmer { background: linear-gradient(90deg, #f0f2f5 0%, #e5e7eb 50%, #f0f2f5 100%); background-size: 200% 100%; animation: shimmer 1.5s infinite linear; }
-      @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-      .page-transition { animation: fade-in-up 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-      @keyframes fade-in-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+        :root { --app-bg: #F0F2F5; --blue: #1E40AF; --text: #1A1C2E; --mint: #00D09C; }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; outline: none; }
+        body { background-color: var(--app-bg); font-family: 'Inter', sans-serif; min-height: 100dvh; width: 100vw; overflow: hidden; position: fixed; margin: 0; color: var(--text); }
+        #root { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* Neumorphic Shadow System */
+        .neumorphic { background: #F0F2F5; border-radius: 28px; box-shadow: 12px 12px 24px #d1d9e6, -12px -12px 24px #ffffff; }
+        .neumorphic-inset { background: #F0F2F5; box-shadow: inset 6px 6px 12px #d1d9e6, inset -6px -6px 12px #ffffff; }
+        .neumorphic-flat { background: #F0F2F5; box-shadow: 4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff; }
+        .neumorphic-pressed { background: #F0F2F5; box-shadow: inset 4px 4px 8px #b8b9be, inset -4px -4px 8px #ffffff; }
+        .logo-raised { background: #F0F2F5; box-shadow: 4px 4px 10px #d1d9e6, -4px -4px 10px #ffffff; }
+        .fab-shadow { box-shadow: 0 15px 35px rgba(30, 64, 175, 0.45); }
+        
+        .scroll-container { flex: 1; overflow-y: auto; padding-bottom: 160px; -webkit-overflow-scrolling: touch; }
+        .scroll-container::-webkit-scrollbar { width: 0; background: transparent; }
+        
+        .page-transition { animation: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fade-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-    <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@18.2.0",
-    "react-dom": "https://esm.sh/react-dom@18.2.0",
-    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-    "react/": "https://esm.sh/react@18.2.0/",
-    "react-dom/": "https://esm.sh/react-dom@18.2.0/",
-    "firebase/app": "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js",
-    "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js",
-    "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js",
-    "chart.js/auto": "https://esm.sh/chart.js@4.4.1/auto",
-    "firebase/": "https://esm.sh/firebase@^12.8.0/",
-    "chart.js/": "https://esm.sh/chart.js@^4.5.1/"
-  }
-}
-</script>
-  </head>
-  <body>
+        .scan-line { position: absolute; left: 0; right: 0; height: 3px; background: var(--blue); box-shadow: 0 0 20px var(--blue); z-index: 10; animation: scan 2.5s infinite ease-in-out; }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+
+        .stealth-blur { filter: blur(14px); transition: filter 0.4s ease; }
+        
+        /* Skeleton Shimmer */
+        .shimmer { background: linear-gradient(90deg, #e9edf1 25%, #f6f7f9 50%, #e9edf1 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+        .frosted-nav { background: rgba(240, 242, 245, 0.8); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-top: 1px solid rgba(255,255,255,0.4); }
+    </style>
+</head>
+<body>
     <div id="root"></div>
 
-    <!-- MAIN APP BOOTSTRAP -->
-    <script type="module" src="./index.tsx"></script>
-
-    <!-- CORRECT SERVICE WORKER REGISTRATION -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('XpenseFlow: SW Registered'))
-            .catch(err => console.debug('SW Registration failed:', err));
-        });
-      }
+    <!-- Gemini SDK -->
+    <script type="module">
+        import { GoogleGenAI } from 'https://esm.run/@google/genai';
+        window.GoogleGenAI = GoogleGenAI;
     </script>
-  </body>
+
+    <!-- App Manifest & Service Worker -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if ('serviceWorker' in navigator) {
+                const swContent = "self.addEventListener('fetch', (e) => { e.respondWith(fetch(e.request).catch(() => caches.match(e.request))); });";
+                const swBlob = new Blob([swContent], { type: 'application/javascript' });
+                navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
+            }
+        });
+    </script>
+
+    <!-- Main React Logic -->
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useRef, useCallback } = React;
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBhUgvyYF_6BJkexyQvCSCCC8wev8Cnxbw",
+            authDomain: "kids-d0256.firebaseapp.com",
+            projectId: "kids-d0256",
+            storageBucket: "kids-d0256.appspot.com",
+            messagingSenderId: "975392531560",
+            appId: "1:975392531560:web:7b165f696b1bdc8f57f47dd"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Constants
+        const LOGO_URL = "https://ik.imagekit.io/13pcmqqzn/1000169239-removebg-preview%20(1).png?updatedAt=1768349953144";
+        const CATEGORIES = ["Food", "Transport", "Shopping", "Bills", "Health", "Investment", "Salary", "Other"];
+        const CURRENCIES = {
+            USD: { symbol: '$', rate: 1 }, INR: { symbol: '₹', rate: 83.33 }, EUR: { symbol: '€', rate: 0.92 },
+            GBP: { symbol: '£', rate: 0.79 }, JPY: { symbol: '¥', rate: 151.41 }
+        };
+        const LANGUAGES = {
+            en: { home: 'Home', history: 'History', settings: 'Settings', balance: 'Net Worth', income: 'Income', expense: 'Expense', budget: 'Monthly Budget', add: 'New Entry', save: 'Save Transaction', logout: 'Sign Out' },
+            hi: { home: 'मुख्य', history: 'इतिहास', settings: 'सेटिंग्स', balance: 'कुल संपत्ति', income: 'आय', expense: 'खर्च', budget: 'मासिक बजट', add: 'नया लेनदेन', save: 'सहेजें', logout: 'साइन आउट' },
+            es: { home: 'Inicio', history: 'Historial', settings: 'Ajustes', balance: 'Patrimonio', income: 'Ingresos', expense: 'Gastos', budget: 'Presupuesto', add: 'Nueva Entrada', save: 'Guardar', logout: 'Cerrar Sesión' },
+            fr: { home: 'Accueil', history: 'Histoire', settings: 'Réglages', balance: 'Valeur Nette', income: 'Revenu', expense: 'Dépense', budget: 'Budget Mensuel', add: 'Nouvelle Entrée', save: 'Enregistrer', logout: 'Déconnexion' }
+        };
+
+        // --- COMPONENTS ---
+
+        const ShimmerLoader = () => (
+            <div className="space-y-8 p-10 page-transition">
+                <div className="h-44 neumorphic shimmer"></div>
+                <div className="flex gap-6">
+                    <div className="flex-1 h-28 neumorphic shimmer"></div>
+                    <div className="flex-1 h-28 neumorphic shimmer"></div>
+                </div>
+                <div className="h-72 neumorphic shimmer"></div>
+            </div>
+        );
+
+        const AuthView = () => {
+            const [email, setEmail] = useState('');
+            const [pass, setPass] = useState('');
+            const [isLogin, setIsLogin] = useState(true);
+
+            const handleEmailAuth = async () => {
+                try {
+                    if (isLogin) await auth.signInWithEmailAndPassword(email, pass);
+                    else await auth.createUserWithEmailAndPassword(email, pass);
+                } catch (e) { alert(e.message); }
+            };
+
+            const handleGoogleAuth = async () => {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                try { await auth.signInWithPopup(provider); } catch (e) { alert(e.message); }
+            };
+
+            return (
+                <div className="h-screen flex flex-col items-center justify-center p-8 bg-[#F0F2F5] page-transition">
+                    <div className="w-24 h-24 neumorphic flex items-center justify-center mb-10 logo-raised">
+                        <img src={LOGO_URL} className="w-16 h-16 object-contain" />
+                    </div>
+                    <div className="text-center mb-10">
+                        <h1 className="text-4xl font-black text-[#1A1C2E] tracking-tight">Xpense<span className="text-blue-600">Flow</span></h1>
+                        <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mt-2">Native Financial Intelligence</p>
+                    </div>
+                    <div className="neumorphic w-full max-w-sm p-8 space-y-6">
+                        <input type="email" placeholder="Corporate Email" value={email} onChange={e => setEmail(e.target.value)} className="w-full p-5 neumorphic-inset outline-none rounded-2xl font-medium" />
+                        <input type="password" placeholder="Secure Password" value={pass} onChange={e => setPass(e.target.value)} className="w-full p-5 neumorphic-inset outline-none rounded-2xl font-medium" />
+                        <button onClick={handleEmailAuth} className="w-full py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl active:scale-95 transition-all">
+                            {isLogin ? 'Sign In' : 'Join XpenseFlow'}
+                        </button>
+                        <div className="relative flex items-center justify-center py-2">
+                            <div className="w-full border-t border-gray-200"></div>
+                            <span className="absolute bg-[#F0F2F5] px-4 text-[9px] font-black text-gray-400 uppercase tracking-widest">Enterprise Access</span>
+                        </div>
+                        <button onClick={handleGoogleAuth} className="w-full py-4 neumorphic-flat flex items-center justify-center gap-3 font-bold rounded-2xl active:scale-95 transition-all">
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5" /> Sync with Google
+                        </button>
+                    </div>
+                    <button onClick={() => setIsLogin(!isLogin)} className="mt-10 text-[10px] font-black text-gray-400 hover:text-blue-600 uppercase tracking-[0.2em] transition-colors">
+                        {isLogin ? "No account? Register Profile" : "Existing member? Authenticate"}
+                    </button>
+                </div>
+            );
+        };
+
+        const DashboardView = ({ stats, settings, transactions, language }) => {
+            const t = LANGUAGES[language];
+            const privacyClass = settings.stealth ? 'stealth-blur' : '';
+            const budgetProgress = settings.budgetLimit > 0 ? (stats.exp / settings.budgetLimit) * 100 : 0;
+
+            useEffect(() => {
+                const ctx = document.getElementById('wealthChart');
+                if (!ctx || transactions.length === 0) return;
+                const daily = transactions.reduce((acc, tr) => {
+                    const date = new Date(tr.date).toLocaleDateString(undefined, { weekday: 'short' });
+                    acc[date] = (acc[date] || 0) + (tr.type === 'EXPENSE' ? tr.amount : 0);
+                    return acc;
+                }, {});
+                const labels = Object.keys(daily).slice(-7);
+                const values = labels.map(l => daily[l]);
+
+                const chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels, datasets: [{ data: values, backgroundColor: '#3b82f6', borderRadius: 10 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
+                });
+                return () => chart.destroy();
+            }, [transactions]);
+
+            return (
+                <div className="space-y-8 page-transition">
+                    <div className="neumorphic p-10 text-center relative overflow-hidden group">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.3em] mb-3">{t.balance}</p>
+                        <h2 className={`text-5xl font-black text-[#1A1C2E] tracking-tighter ${privacyClass}`}>
+                            {CURRENCIES[settings.currency].symbol}{stats.bal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        </h2>
+                    </div>
+
+                    <div className="neumorphic p-7">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t.budget} Control</h3>
+                            <span className="text-[10px] font-black text-blue-600">{Math.round(budgetProgress)}%</span>
+                        </div>
+                        <div className="h-5 w-full neumorphic-inset rounded-full p-1.5 overflow-hidden">
+                            <div className="h-full bg-blue-600 rounded-full transition-all duration-1000 shadow-[0_0_15px_rgba(30,64,175,0.3)]" style={{ width: `${Math.min(100, budgetProgress)}%` }}></div>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-6">
+                        <div className="neumorphic flex-1 p-6 text-center">
+                            <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-3 shadow-inner"><i className="fa-solid fa-arrow-up text-[11px]"></i></div>
+                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">{t.income}</p>
+                            <p className={`text-xl font-black text-emerald-600 ${privacyClass}`}>+{CURRENCIES[settings.currency].symbol}{stats.inc.toFixed(0)}</p>
+                        </div>
+                        <div className="neumorphic flex-1 p-6 text-center">
+                            <div className="w-9 h-9 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3 shadow-inner"><i className="fa-solid fa-arrow-down text-[11px]"></i></div>
+                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">{t.expense}</p>
+                            <p className={`text-xl font-black text-rose-600 ${privacyClass}`}>-{CURRENCIES[settings.currency].symbol}{stats.exp.toFixed(0)}</p>
+                        </div>
+                    </div>
+                    
+                    <AIInsightBubble stats={stats} currency={settings.currency} language={language} />
+
+                    <div className="neumorphic p-8 h-72 relative">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Financial Trends</p>
+                        <canvas id="wealthChart"></canvas>
+                    </div>
+                </div>
+            );
+        };
+        
+        const AIInsightBubble = ({ stats, currency, language }) => {
+            const [insight, setInsight] = useState('');
+            useEffect(() => {
+                if (stats.inc === 0 && stats.exp === 0 || !window.GoogleGenAI) return;
+                const fetchAI = async () => {
+                    try {
+                        const ai = new window.GoogleGenAI({ apiKey: process.env.API_KEY });
+                        const res = await ai.models.generateContent({
+                            model: 'gemini-3-flash-preview',
+                            contents: `Provide a professional, clever 1-sentence financial tip based on: ${currency} ${stats.inc} income, ${currency} ${stats.exp} expenses. Language: ${language}. Max 15 words. Be bold.`
+                        });
+                        setInsight(res.text);
+                    } catch (e) { console.error("Insight Error:", e.message); }
+                };
+                fetchAI();
+            }, [stats, language, currency]);
+
+            if (!insight) return null;
+            return (
+                <div className="neumorphic p-6 italic text-sm text-blue-700 bg-blue-50/20 border-l-4 border-blue-600">
+                    <i className="fa-solid fa-wand-magic-sparkles mr-3 text-blue-400"></i> "{insight}"
+                </div>
+            );
+        };
+
+        const AddModal = ({ onClose, onSave, language }) => {
+            const [title, setTitle] = useState('');
+            const [amount, setAmount] = useState('');
+            const [type, setType] = useState('EXPENSE');
+            const [category, setCategory] = useState('Other');
+            const [scanning, setScanning] = useState(false);
+            const t = LANGUAGES[language];
+            const fileRef = useRef();
+
+            const handleReceiptOCR = async (e) => {
+                const file = e.target.files[0];
+                if (!file || !window.GoogleGenAI) return;
+                setScanning(true);
+                try {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = async () => {
+                        const base64 = reader.result.split(',')[1];
+                        const ai = new window.GoogleGenAI({ apiKey: process.env.API_KEY });
+                        const res = await ai.models.generateContent({
+                            model: 'gemini-3-flash-preview',
+                            contents: { parts: [{ inlineData: { mimeType: file.type, data: base64 } }, { text: "Scan receipt. Output ONLY JSON: { merchant: string, amount: number, category: string (Food, Transport, Shopping, Bills, Health, Investment, Salary, Other) }" }] },
+                            config: { responseMimeType: "application/json" }
+                        });
+                        const data = JSON.parse(res.text);
+                        setTitle(data.merchant || '');
+                        setAmount(data.amount?.toString() || '');
+                        setCategory(data.category || 'Other');
+                        setScanning(false);
+                    };
+                } catch (err) { alert("OCR Failed: " + err.message); setScanning(false); }
+            };
+
+            return (
+                <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-md flex items-end justify-center" onClick={onClose}>
+                    <div className="w-full max-w-md bg-[#F0F2F5] rounded-t-[50px] p-10 pb-16 shadow-2xl relative animate-in slide-in-from-bottom duration-500" onClick={e => e.stopPropagation()}>
+                        {scanning && (
+                            <div className="absolute inset-0 z-50 bg-[#F0F2F5]/95 rounded-t-[50px] flex flex-col items-center justify-center">
+                                <div className="w-56 h-72 neumorphic-inset overflow-hidden mb-8 relative">
+                                    <div className="scan-line"></div>
+                                    <div className="h-full flex items-center justify-center opacity-30 text-blue-600"><i className="fa-solid fa-camera fa-4x"></i></div>
+                                </div>
+                                <p className="font-black text-blue-600 animate-pulse uppercase tracking-[0.3em] text-xs">AI OCR SCANNING</p>
+                            </div>
+                        )}
+                        <div className="flex justify-between items-center mb-10">
+                            <h3 className="text-3xl font-black text-[#1A1C2E] tracking-tight">{t.add}</h3>
+                            <div className="flex gap-4">
+                                <button onClick={() => fileRef.current.click()} className="w-14 h-14 neumorphic-flat text-blue-600 flex items-center justify-center active:scale-90 transition-all rounded-2xl"><i className="fa-solid fa-camera text-xl"></i></button>
+                                <button onClick={onClose} className="w-14 h-14 neumorphic-flat text-gray-400 flex items-center justify-center active:scale-90 transition-all rounded-2xl"><i className="fa-solid fa-xmark text-xl"></i></button>
+                            </div>
+                        </div>
+                        <input type="file" ref={fileRef} className="hidden" accept="image/*" onChange={handleReceiptOCR} />
+                        <div className="space-y-7">
+                            <div className="flex p-1.5 neumorphic-inset rounded-2xl">
+                                <button onClick={() => setType('EXPENSE')} className={`flex-1 py-4 font-black rounded-xl transition-all ${type === 'EXPENSE' ? 'bg-white shadow-sm text-rose-500' : 'text-gray-400'}`}>Expense</button>
+                                <button onClick={() => setType('INCOME')} className={`flex-1 py-4 font-black rounded-xl transition-all ${type === 'INCOME' ? 'bg-white shadow-sm text-emerald-500' : 'text-gray-400'}`}>Income</button>
+                            </div>
+                            <input placeholder="Transaction Title" value={title} onChange={e => setTitle(e.target.value)} className="w-full p-6 neumorphic-inset outline-none rounded-2xl font-bold text-lg" />
+                            <div className="flex gap-5">
+                                <input type="number" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)} className="flex-1 p-6 neumorphic-inset outline-none rounded-2xl font-black text-3xl text-blue-600" />
+                                <select value={category} onChange={e => setCategory(e.target.value)} className="w-36 p-6 neumorphic-inset outline-none rounded-2xl font-black bg-transparent text-xs appearance-none text-center">
+                                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                            </div>
+                            <button onClick={() => onSave({ title, amount: parseFloat(amount), type, category, date: new Date().toISOString() })} className="w-full py-6 bg-blue-600 text-white font-black rounded-[28px] shadow-2xl active:scale-95 transition-all text-lg tracking-widest uppercase">Commit Transaction</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const SettingsView = ({ settings, setSettings, user, language, setLanguage, transactions }) => {
+            const t = LANGUAGES[language];
+            
+            const exportCSV = () => {
+                const headers = "Date,Title,Type,Category,Amount\n";
+                const rows = transactions.map(tr => `${new Date(tr.date).toLocaleDateString()},${tr.title},${tr.type},${tr.category},${tr.amount}`).join("\n");
+                const blob = new Blob([headers + rows], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = `XpenseFlow_Vault_${Date.now()}.csv`;
+                a.click();
+            };
+
+            const exportPDF = () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.setFontSize(22); doc.text("XpenseFlow Corporate Audit", 20, 25);
+                doc.setFontSize(10); doc.text(`Secure Record: ${user.email} | timestamp: ${new Date().toISOString()}`, 20, 35);
+                let y = 55;
+                transactions.slice(0, 40).forEach(tr => {
+                    doc.text(`${new Date(tr.date).toLocaleDateString()} | ${tr.title.padEnd(20)} | ${tr.type} | ${tr.amount}`, 20, y);
+                    y += 8;
+                });
+                doc.save(`WealthAudit_${Date.now()}.pdf`);
+            };
+
+            return (
+                <div className="space-y-12 page-transition">
+                    <h3 className="text-3xl font-black text-[#1A1C2E] px-2 tracking-tight">{t.settings}</h3>
+                    
+                    <div className="neumorphic p-8 space-y-10">
+                        <div>
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-5">Localization Engine</p>
+                            <div className="grid grid-cols-2 gap-5">
+                                {Object.keys(LANGUAGES).map(l => (
+                                    <button key={l} onClick={() => setLanguage(l)} className={`py-5 rounded-2xl font-black transition-all ${language === l ? 'neumorphic-pressed text-blue-600' : 'neumorphic-flat text-gray-400'}`}>
+                                        {l.toUpperCase()}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div>
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-5">Global Currencies</p>
+                            <div className="grid grid-cols-5 gap-3">
+                                {Object.keys(CURRENCIES).map(c => (
+                                    <button key={c} onClick={() => setSettings({...settings, currency: c})} className={`py-4 rounded-xl text-[10px] font-black transition-all ${settings.currency === c ? 'neumorphic-pressed text-blue-600' : 'neumorphic-flat text-gray-400'}`}>
+                                        {c}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-6 neumorphic-flat rounded-[28px]">
+                            <div>
+                                <p className="font-black text-sm text-[#1A1C2E]">Stealth Mode</p>
+                                <p className="text-[10px] text-gray-400 font-bold tracking-tight">Obfuscate all asset balances</p>
+                            </div>
+                            <button onClick={() => setSettings({...settings, stealth: !settings.stealth})} className={`w-14 h-7 rounded-full relative transition-all duration-300 ${settings.stealth ? 'bg-blue-600' : 'neumorphic-inset'}`}>
+                                <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all ${settings.stealth ? 'right-1' : 'left-1'}`}></div>
+                            </button>
+                        </div>
+
+                        <div>
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-5">Spend Limit Allocation</p>
+                            <input type="number" value={settings.budgetLimit} onChange={e => setSettings({...settings, budgetLimit: Number(e.target.value)})} className="w-full p-5 neumorphic-inset outline-none rounded-2xl font-black text-xl text-blue-600" />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-8">
+                        <button onClick={exportCSV} className="neumorphic p-8 flex flex-col items-center gap-3 active:scale-95 transition-all text-emerald-600">
+                            <i className="fa-solid fa-file-csv text-3xl"></i>
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Export Vault</span>
+                        </button>
+                        <button onClick={exportPDF} className="neumorphic p-8 flex flex-col items-center gap-3 active:scale-95 transition-all text-rose-600">
+                            <i className="fa-solid fa-file-pdf text-3xl"></i>
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Export PDF</span>
+                        </button>
+                    </div>
+
+                    <button onClick={() => auth.signOut()} className="w-full py-6 neumorphic-flat text-rose-500 font-black rounded-[28px] active:scale-95 transition-all flex items-center justify-center gap-4 border border-rose-50 text-lg uppercase tracking-widest">
+                        <i className="fa-solid fa-power-off text-sm"></i> Secure Sign Out
+                    </button>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [user, setUser] = useState(null);
+            const [loading, setLoading] = useState(true);
+            const [activeTab, setActiveTab] = useState('home');
+            const [transactions, setTransactions] = useState([]);
+            const [isAddOpen, setAddOpen] = useState(false);
+            const [language, setLanguage] = useState('en');
+            const [settings, setSettings] = useState({ currency: 'USD', budgetLimit: 5000, stealth: false });
+
+            useEffect(() => {
+                return auth.onAuthStateChanged(u => {
+                    setUser(u ? { uid: u.uid, email: u.email } : null);
+                    setLoading(false);
+                });
+            }, []);
+
+            useEffect(() => {
+                if (!user) return;
+                const unsub = db.collection('users').doc(user.uid).collection('transactions')
+                    .orderBy('date', 'desc')
+                    .onSnapshot(snap => setTransactions(snap.docs.map(d => ({ id: d.id, ...d.data() }))), e => console.error("Firebase Error:", e.message));
+                return unsub;
+            }, [user]);
+
+            const stats = useMemo(() => transactions.reduce((acc, t) => {
+                const amt = t.amount || 0;
+                if (t.type === 'INCOME') { acc.inc += amt; acc.bal += amt; }
+                else { acc.exp += amt; acc.bal -= amt; }
+                return acc;
+            }, { bal: 0, inc: 0, exp: 0 }), [transactions]);
+
+            const handleSave = async (data) => {
+                if (!data.title || isNaN(data.amount)) return;
+                try {
+                    await db.collection('users').doc(user.uid).collection('transactions').add(data);
+                    setAddOpen(false);
+                } catch (e) { console.error("Save Error:", e.message); }
+            };
+
+            const handleDelete = async (id) => {
+                if (confirm("Permanently purge this financial record?")) {
+                    try { await db.collection('users').doc(user.uid).collection('transactions').doc(id).delete(); } catch (e) { console.error("Delete Error:", e.message); }
+                }
+            };
+
+            if (loading) return <ShimmerLoader />;
+
+            if (!user) return <AuthView />;
+
+            const t = LANGUAGES[language];
+
+            return (
+                <div className="h-full flex flex-col">
+                    <header className="px-10 pt-16 pb-6 flex justify-between items-center z-10">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 logo-raised flex items-center justify-center rounded-2xl overflow-hidden shrink-0 active:scale-95 transition-all"><img src={LOGO_URL} className="w-8 h-8" /></div>
+                            <h1 className="text-2xl font-black text-[#1A1C2E] tracking-tight">Xpense<span className="text-blue-600">Flow</span></h1>
+                        </div>
+                        <button onClick={() => setActiveTab('settings')} className="w-14 h-14 neumorphic-flat flex items-center justify-center rounded-2xl active:scale-90 transition-all text-blue-600 opacity-60 hover:opacity-100">
+                            <i className="fa-solid fa-user-shield text-xl"></i>
+                        </button>
+                    </header>
+
+                    <main className="scroll-container px-10 pt-6">
+                        {activeTab === 'home' && <DashboardView stats={stats} settings={settings} transactions={transactions} language={language} />}
+                        {activeTab === 'history' && (
+                            <div className="space-y-8 page-transition">
+                                <h3 className="text-3xl font-black text-[#1A1C2E] px-2 tracking-tight">{t.history}</h3>
+                                {transactions.length === 0 ? (
+                                    <div className="text-center py-32 text-gray-300 font-black opacity-20 tracking-[0.4em] uppercase text-[10px]">NULL_ACTIVITY_LOG</div>
+                                ) : (
+                                    transactions.map(item => (
+                                        <div key={item.id} className="neumorphic p-6 flex justify-between items-center active:neumorphic-pressed transition-all duration-300">
+                                            <div className="flex items-center gap-5">
+                                                <div className={`w-12 h-12 neumorphic-inset flex items-center justify-center rounded-2xl ${item.type === 'INCOME' ? 'text-emerald-500' : 'text-rose-500 shadow-[inset_0_0_10px_rgba(244,63,94,0.1)]'}`}>
+                                                    <i className={`fa-solid ${item.type === 'INCOME' ? 'fa-arrow-up' : 'fa-arrow-down'} text-sm`}></i>
+                                                </div>
+                                                <div>
+                                                    <p className="font-black text-[#1A1C2E] text-sm tracking-tight">{item.title}</p>
+                                                    <p className="text-[9px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1">{item.category} • {new Date(item.date).toLocaleDateString()}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-6">
+                                                <p className={`font-black text-base ${item.type === 'INCOME' ? 'text-emerald-500' : 'text-rose-500'} ${settings.stealth ? 'stealth-blur' : ''}`}>
+                                                    {item.type === 'INCOME' ? '+' : '-'}{CURRENCIES[settings.currency].symbol}{item.amount.toFixed(2)}
+                                                </p>
+                                                <button onClick={() => handleDelete(item.id)} className="text-gray-300 hover:text-rose-500 active:scale-125 transition-all"><i className="fa-solid fa-trash-can text-sm"></i></button>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
+                        {activeTab === 'settings' && <SettingsView settings={settings} setSettings={setSettings} user={user} language={language} setLanguage={setLanguage} transactions={transactions} />}
+                    </main>
+
+                    <nav className="fixed bottom-0 left-0 right-0 h-28 frosted-nav flex items-center justify-around px-12 pb-8">
+                        <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center gap-2 transition-all duration-300 ${activeTab === 'home' ? 'text-blue-600 scale-110' : 'text-gray-400 hover:text-gray-600'}`}>
+                            <i className="fa-solid fa-house-user text-xl"></i>
+                            <span className="text-[9px] font-black uppercase tracking-[0.1em]">{t.home}</span>
+                        </button>
+                        
+                        <button onClick={() => setAddOpen(true)} className="w-20 h-20 rounded-full bg-blue-600 text-white fab-shadow flex items-center justify-center -translate-y-10 border-[8px] border-[#F0F2F5] active:scale-90 active:rotate-90 transition-all duration-500">
+                            <i className="fa-solid fa-plus text-3xl"></i>
+                        </button>
+
+                        <button onClick={() => setActiveTab('history')} className={`flex flex-col items-center gap-2 transition-all duration-300 ${activeTab === 'history' ? 'text-blue-600 scale-110' : 'text-gray-400 hover:text-gray-600'}`}>
+                            <i className="fa-solid fa-receipt text-xl"></i>
+                            <span className="text-[9px] font-black uppercase tracking-[0.1em]">{t.history}</span>
+                        </button>
+                    </nav>
+
+                    {isAddOpen && <AddModal onClose={() => setAddOpen(false)} onSave={handleSave} language={language} />}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
 </html>

@@ -1,5 +1,5 @@
 {
-  "name": "receipt-&-expense-tracker",
+  "name": "xpenseflow-professional",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,14 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "firebase": "^12.8.0",
-    "chart.js": "^4.5.1"
+
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
+    
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }

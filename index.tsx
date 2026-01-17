@@ -1,18 +1,1 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import { LanguageProvider } from './contexts/LanguageContext';
-import { AuthProvider } from './AuthContext';
-
-const rootElement = document.getElementById('root');
-if (!rootElement) throw new Error('Root element not found');
-
-const root = ReactDOM.createRoot(rootElement);
-
-root.render(
-  <LanguageProvider>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
-  </LanguageProvider>
-);
+// Logic consolidated into index.html
